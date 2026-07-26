@@ -1,0 +1,66 @@
+{
+  "name": "🎬 monki",
+  "publisher": "webnosferatu",
+  "stickers": [
+    {
+      "id": "monki-1",
+      "file": "monki-1.webp",
+      "creator": "webnosferatu",
+      "description": "monki pack"
+    },
+    {
+      "id": "monki-2",
+      "file": "monki-2.webp",
+      "creator": "webnosferatu",
+      "description": "monki pack"
+    },
+    {
+      "id": "monki-3",
+      "file": "monki-3.webp",
+      "creator": "webnosferatu",
+      "description": "monki pack"
+    },
+    {
+      "id": "monki-4",
+      "file": "monki-4.webp",
+      "creator": "webnosferatu",
+      "description": "monki pack"
+    },
+    {
+      "id": "monki-5",
+      "file": "monki-5.webp",
+      "creator": "webnosferatu",
+      "description": "monki pack"
+    },
+    {
+      "id": "monki-6",
+      "file": "monki-6.webp",
+      "creator": "webnosferatu",
+      "description": "monki pack"
+    },
+    {
+      "id": "monki-7",
+      "file": "monki-7.webp",
+      "creator": "webnosferatu",
+      "description": "monki pack"
+    },
+    {
+      "id": "monki-8",
+      "file": "monki-8.webp",
+      "creator": "webnosferatu",
+      "description": "snoopy"
+    },
+    {
+      "id": "monki-9",
+      "file": "monki-9.webp",
+      "creator": "webnosferatu",
+      "description": "monki pack"
+    },
+    {
+      "id": "monki-10",
+      "file": "monki-10.png",
+      "creator": "webnosferatu",
+      "description": "papoi"
+    }
+  ]
+}

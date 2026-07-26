@@ -1,0 +1,44 @@
+{
+  "stickers": [
+    {
+      "id": "cmrwlorjr578e",
+      "file": "custom/cmrwlorjr578e.webp",
+      "kind": "image",
+      "creator": "adri",
+      "description": "blabla",
+      "at": 1784756078227
+    },
+    {
+      "id": "cmrwt4vhb4176",
+      "file": "custom/cmrwt4vhb4176.webp",
+      "kind": "image",
+      "creator": "adri",
+      "description": "adri",
+      "at": 1784768587122
+    },
+    {
+      "id": "cmrwzpgvv1dfb",
+      "file": "custom/cmrwzpgvv1dfb.png",
+      "kind": "image",
+      "creator": "mari adm te amo",
+      "description": "bleh",
+      "at": 1784779625667
+    },
+    {
+      "id": "cmrx02vx40d87",
+      "file": "custom/cmrx02vx40d87.webp",
+      "kind": "image",
+      "creator": "adri",
+      "description": "blabla",
+      "at": 1784780251678
+    },
+    {
+      "id": "cms1gqnrhafc5",
+      "file": "custom/cms1gqnrhafc5.webp",
+      "kind": "image",
+      "creator": "adriano",
+      "description": "teste",
+      "at": 1785050102143
+    }
+  ]
+}

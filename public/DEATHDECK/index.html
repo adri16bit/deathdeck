@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+  <meta name="theme-color" content="#111111" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Deathdeck" />
+  <title>Panchiko · D&gt;E&gt;A&gt;T&gt;H&gt;D&gt;E&gt;C&gt;K</title>
+  <link rel="manifest" href="manifest.json?v=live168" />
+  <link rel="icon" href="assets/favicon.jpg?v=2" type="image/jpeg" sizes="192x192" />
+  <link rel="apple-touch-icon" href="assets/favicon.jpg?v=2" />
+  <link rel="shortcut icon" href="assets/favicon.jpg?v=2" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css?v=live168" />
+  <style id="deckWelcomeCritical">
+    #deckWelcome.deck-welcome {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 2147483000 !important;
+      display: grid !important;
+      place-items: center !important;
+      margin: 0 !important;
+      padding: 1.25rem !important;
+      box-sizing: border-box !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      background: rgba(16, 12, 8, 0.72) !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+    #deckWelcome.deck-welcome.on {
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+    }
+    #deckWelcome .deck-welcome-card {
+      width: min(100%, 22.5rem) !important;
+      max-width: 22.5rem !important;
+      margin: 0 !important;
+      padding: 1.25rem 1.15rem 1.1rem !important;
+      box-sizing: border-box !important;
+      background: #f7f2ea !important;
+      border: 1px solid #111 !important;
+      box-shadow: 0 22px 48px rgba(16, 10, 4, 0.4) !important;
+      color: #111 !important;
+    }
+    #deckWelcome .deck-welcome-kicker {
+      margin: 0 0 0.45rem !important;
+      font-family: "IBM Plex Mono", ui-monospace, monospace !important;
+      font-size: 0.62rem !important;
+      letter-spacing: 0.12em !important;
+      text-transform: uppercase !important;
+      color: #666 !important;
+    }
+    #deckWelcome .deck-welcome-brand {
+      margin: 0 !important;
+      font-family: Oswald, Impact, sans-serif !important;
+      font-style: italic !important;
+      font-weight: 700 !important;
+      font-size: clamp(2.2rem, 8vw, 2.85rem) !important;
+      line-height: 0.9 !important;
+      color: #111 !important;
+    }
+    #deckWelcome .deck-welcome-title {
+      margin: 0.35rem 0 0.75rem !important;
+      font-family: "IBM Plex Mono", ui-monospace, monospace !important;
+      font-size: 0.78rem !important;
+      font-weight: 500 !important;
+      letter-spacing: 0.08em !important;
+      color: #222 !important;
+    }
+    #deckWelcome .deck-welcome-body,
+    #deckWelcome .deck-welcome-note {
+      margin: 0 0 0.65rem !important;
+      font-family: "IBM Plex Mono", ui-monospace, monospace !important;
+      font-size: 0.74rem !important;
+      line-height: 1.5 !important;
+      color: #333 !important;
+    }
+    #deckWelcome .deck-welcome-note {
+      margin-bottom: 1rem !important;
+      font-size: 0.62rem !important;
+      color: #777 !important;
+    }
+    #deckWelcome #deckWelcomeGo {
+      width: 100% !important;
+      appearance: none !important;
+      border: 1px solid #111 !important;
+      background: #111 !important;
+      color: #f7f2ea !important;
+      font-family: "IBM Plex Mono", ui-monospace, monospace !important;
+      font-size: 0.78rem !important;
+      padding: 0.7rem 1rem !important;
+      cursor: pointer !important;
+    }
+    body.deck-welcome-open {
+      overflow: hidden !important;
+    }
+  </style>
+</head>
+<body class="panchiko">
+  <div class="deck-welcome" id="deckWelcome" aria-hidden="true">
+    <div class="deck-welcome-card" role="dialog" aria-labelledby="deckWelcomeTitle" aria-modal="true">
+      <p class="deck-welcome-kicker">boot · first contact</p>
+      <p class="deck-welcome-brand">Panchiko</p>
+      <h2 id="deckWelcomeTitle" class="deck-welcome-title">D&gt;E&gt;A&gt;T&gt;H&gt;D&gt;E&gt;C&gt;K</h2>
+      <p class="deck-welcome-body">
+        tributo fan-made à demo que sumiu e voltou do além.
+        capa DIY, ~30 CD-Rs, Oxfam, <em>/mu/</em>, disc rot —
+        um deck pra ouvir, caçar a história e abrir um canal 1:1.
+      </p>
+      <p class="deck-welcome-note">sem afiliação oficial · só obsessão e papel amarelado</p>
+      <button type="button" class="btn primary" id="deckWelcomeGo">montar o deck</button>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var el = document.getElementById('deckWelcome');
+      if (!el) return;
+      var mobile = window.matchMedia('(max-width: 820px)').matches
+        || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+      if (!mobile) {
+        el.classList.remove('on');
+        el.setAttribute('aria-hidden', 'true');
+        return;
+      }
+      var force = /(?:\?|&)(?:welcome|boot)=1(?:&|$)/.test(location.search);
+      var done = false;
+      try { done = localStorage.getItem('voidwire-boot-done-v3') === '1'; } catch (e) {}
+      if (done && !force) return;
+      el.classList.add('on');
+      el.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('deck-welcome-open');
+      window.__DECK_WELCOME_PENDING = true;
+    })();
+  </script>
+  <div class="atmosphere" aria-hidden="true"></div>
+  <div class="vhs" aria-hidden="true"></div>
+  <div class="fx-layer" id="fxLayer" aria-hidden="true"></div>
+
+  <main class="rig" id="rig">
+    <aside class="grip grip-l" aria-hidden="true"></aside>
+
+    <section class="chassis">
+      <header class="mast">
+        <div class="brand-block">
+          <p class="brand">Panchiko</p>
+          <h1 class="model">D&gt;E&gt;A&gt;T&gt;H&gt;D&gt;E&gt;C&gt;K</h1>
+        </div>
+        <div class="mast-meta">
+          <button type="button" class="chip deck-fs-btn" id="deckFsBtn" title="por o site em tela cheia">tela cheia</button>
+          <span class="chip" id="aiChip">CD-R · …</span>
+          <span class="chip" id="pyChip">PY · …</span>
+          <span class="chip live" id="xpChip">XP 0</span>
+          <span class="chip clock" id="clock">00:00</span>
+        </div>
+      </header>
+
+      <nav class="tabs" id="tabs" role="tablist">
+        <button type="button" class="tab on" data-tab="home" role="tab">HOME</button>
+        <button type="button" class="tab" data-tab="ep" role="tab">EP</button>
+        <button type="button" class="tab" data-tab="hunt" role="tab">HUNT</button>
+        <button type="button" class="tab" data-tab="wbm" role="tab">WBM</button>
+        <button type="button" class="tab" data-tab="band" role="tab">BAND</button>
+        <button type="button" class="tab" data-tab="rot" role="tab">ROT</button>
+        <button type="button" class="tab" data-tab="disco" role="tab">DISCO</button>
+        <button type="button" class="tab" data-tab="play" role="tab">PLAY</button>
+        <button type="button" class="tab" data-tab="link" role="tab">CD-R</button>
+        <button type="button" class="tab" data-tab="comms" role="tab">COMMS</button>
+        <button type="button" class="tab" data-tab="app" role="tab">APP</button>
+        <button type="button" class="tab" data-tab="out" role="tab">OUT</button>
+      </nav>
+
+      <div class="viewport">
+        <!-- HOME -->
+        <div class="pane on" id="pane-home" data-pane="home">
+          <div class="home-layout">
+            <div class="home-hero">
+              <p class="eyebrow">nottingham · oxfam · /mu/ · disc rot · 2000→2020</p>
+              <p class="lede">Demo caseira que virou lostwave. Capa DIY, ~30 CD-Rs, achada num brechó. Não é death metal — é <em>weeb indietronica</em>.</p>
+              <div class="home-actions">
+                <button type="button" class="btn primary" data-jump="play">ouvir o álbum</button>
+                <button type="button" class="btn" data-jump="ep">abrir o EP</button>
+                <button type="button" class="btn" data-jump="hunt">a caçada</button>
+              </div>
+              <div class="fx-panel">
+                <p class="eyebrow">fx · toque pra bagunçar a tela</p>
+                <div class="home-actions fx-actions" id="fxActions">
+                  <button type="button" class="btn fx-btn" data-fx="rot">disc rot</button>
+                  <button type="button" class="btn fx-btn" data-fx="skip">cd skip</button>
+                  <button type="button" class="btn fx-btn" data-fx="scan">scanlines</button>
+                  <button type="button" class="btn fx-btn" data-fx="bleach">bleach</button>
+                  <button type="button" class="btn fx-btn" data-fx="shake">shake</button>
+                  <button type="button" class="btn fx-btn" data-fx="static">static</button>
+                  <button type="button" class="btn fx-btn" data-fx="melt">melt</button>
+                </div>
+              </div>
+              <div class="stat-row" id="homeStats"></div>
+              <pre class="boot-tape" id="bootTape"></pre>
+            </div>
+            <figure class="cover-plate">
+              <img src="assets/album-deathmetal.jpg" alt="Capa oficial D>E>A>T>H>M>E>T>A>L — Bandcamp" />
+              <figcaption class="cover-caption">capa oficial · Bandcamp · D&gt;E&gt;A&gt;T&gt;H&gt;M&gt;E&gt;T&gt;A&gt;L</figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <!-- EP -->
+        <div class="pane" id="pane-ep" data-pane="ep">
+          <div class="band-split">
+            <figure class="cover-plate">
+              <img src="assets/album-deathmetal.jpg" alt="D>E>A>T>H>M>E>T>A>L" />
+              <figcaption class="cover-caption">reissue 2020 inclui Kicking Cars + faixas R&gt;O&gt;T</figcaption>
+            </figure>
+            <div>
+              <p class="eyebrow">original EP · junho 2000 · ~18:33</p>
+              <h2 class="section-title">D&gt;E&gt;A&gt;T&gt;H&gt;M&gt;E&gt;T&gt;A&gt;L</h2>
+              <p class="lede short">Owain · Andy · Shaun · John — bedroom demo, sem gravadora.</p>
+              <div class="track-list" id="epTracks">
+                <a class="track" href="https://panchiko.bandcamp.com/track/d-e-a-t-h-m-e-t-a-l-2" target="_blank" rel="noopener">
+                  <span>01</span><strong>D&gt;E&gt;A&gt;T&gt;H&gt;M&gt;E&gt;T&gt;A&gt;L</strong><em>4:21</em>
+                </a>
+                <a class="track" href="https://panchiko.bandcamp.com/track/stabilisers-for-big-boys-2" target="_blank" rel="noopener">
+                  <span>02</span><strong>Stabilisers For Big Boys</strong><em>4:12</em>
+                </a>
+                <a class="track" href="https://panchiko.bandcamp.com/track/laputa-2" target="_blank" rel="noopener">
+                  <span>03</span><strong>Laputa</strong><em>2:43</em>
+                </a>
+                <a class="track" href="https://panchiko.bandcamp.com/track/the-eyes-of-ibad-2" target="_blank" rel="noopener">
+                  <span>04</span><strong>The Eyes of Ibad</strong><em>6:57</em>
+                </a>
+              </div>
+              <p class="hint-line">clique abre no Bandcamp oficial · ouça as versões remaster + R&gt;O&gt;T lá</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- HUNT -->
+        <div class="pane" id="pane-hunt" data-pane="hunt">
+          <p class="eyebrow">lostwave · 4chan /mu/ · panchikord</p>
+          <h2 class="section-title">A caçada</h2>
+          <div class="timeline">
+            <article class="tl-item">
+              <strong>2000</strong>
+              <p>~30 CD-Rs gravados em casa. Nomes só de primeiro: Owain, Andy, Shaun, John.</p>
+            </article>
+            <article class="tl-item">
+              <strong>21 jul 2016</strong>
+              <p>Usuário posta no /mu/ um CD achado num Oxfam em Sherwood, Nottingham. Áudio cheio de disc rot.</p>
+            </article>
+            <article class="tl-item">
+              <strong>2016–2020</strong>
+              <p>Fãs vasculham embalagem, ligam pra loja, montam Discord (Panchikord). Lostwave completo.</p>
+            </article>
+            <article class="tl-item">
+              <strong>jan 2020</strong>
+              <p>Código da loja + “Owain” em Nottingham. A busca encontra a banda — sem eles saberem que eram cult.</p>
+            </article>
+            <article class="tl-item">
+              <strong>16 fev 2020</strong>
+              <p>Reissue no Bandcamp: remasters + Kicking Cars + faixas podres (R&gt;O&gt;T). Vira hit.</p>
+            </article>
+            <article class="tl-item">
+              <strong>depois</strong>
+              <p>Shows, novos discos, turnês. A demo do brechó virou carreira.</p>
+            </article>
+          </div>
+        </div>
+
+        <!-- WBM · fake Wayback Machine -->
+        <div class="pane" id="pane-wbm" data-pane="wbm">
+          <div class="wbm" id="wbmRoot">
+            <header class="wbm-chrome">
+              <div class="wbm-chrome-top">
+                <span class="wbm-logo" aria-hidden="true">A</span>
+                <div class="wbm-brand">
+                  <strong>ARCHIVE</strong>
+                  <em>.ORG</em>
+                </div>
+                <div class="wbm-nav-btns" role="group" aria-label="navegação">
+                  <button type="button" class="wbm-nav-btn" id="wbmBack" title="voltar" aria-label="voltar">←</button>
+                  <button type="button" class="wbm-nav-btn" id="wbmFwd" title="avançar" aria-label="avançar">→</button>
+                  <button type="button" class="wbm-nav-btn wbm-ring-btn" id="wbmRingPrev" title="webring · anterior">≪</button>
+                  <button type="button" class="wbm-nav-btn wbm-ring-btn" id="wbmRingNext" title="webring · próximo">≫</button>
+                </div>
+                <label class="wbm-url-lab">
+                  <span>busca / URL</span>
+                  <input
+                    id="wbmUrl"
+                    type="search"
+                    value="http://www.panchiko-deathmetal.co.uk/"
+                    spellcheck="false"
+                    autocomplete="off"
+                    placeholder="panchiko · /pc · geocities · myspace…"
+                  />
+                </label>
+                <button type="button" class="wbm-go" id="wbmGo" title="ir / buscar no anel">GO</button>
+                <a class="wbm-open-ext" id="wbmOpenExt" href="/pc/" target="_blank" rel="noopener" title="abrir fora" hidden>↗</a>
+              </div>
+              <div class="wbm-ringbar" id="wbmRingBar" role="list" aria-label="webring Panchiko"></div>
+              <div class="wbm-chrome-meta">
+                <p class="wbm-captured">
+                  <span>Captured</span>
+                  <strong id="wbmStamp">12:04:33 Aug 12, 2009</strong>
+                </p>
+                <div class="wbm-cal" id="wbmCal" role="listbox" aria-label="capturas">
+                  <button type="button" class="wbm-dot" data-cap="2001" title="14 Jun 2001 · burn log">01</button>
+                  <button type="button" class="wbm-dot" data-cap="2004" title="03 Mar 2004 · GeoCities">04</button>
+                  <button type="button" class="wbm-dot" data-cap="2007" title="22 Sep 2007 · MySpace">07</button>
+                  <button type="button" class="wbm-dot on" data-cap="2009" title="12 Aug 2009 · fan site">09</button>
+                  <button type="button" class="wbm-dot" data-cap="2012" title="19 Nov 2012 · parked">12</button>
+                  <button type="button" class="wbm-dot" data-cap="2016" title="21 Jul 2016 · /mu/">16</button>
+                  <button type="button" class="wbm-dot" data-cap="2017" title="09 Aug 2017 · YT comments">17</button>
+                  <button type="button" class="wbm-dot" data-cap="2018" title="02 Feb 2018 · paste">18</button>
+                  <button type="button" class="wbm-dot" data-cap="2019" title="11 Jan 2019 · phone log">19</button>
+                  <button type="button" class="wbm-dot" data-cap="2020" title="16 Feb 2020 · Bandcamp">20</button>
+                  <button type="button" class="wbm-dot" data-cap="2021" title="03 Mar 2021 · Wikipedia">21</button>
+                </div>
+                <p class="wbm-about" id="wbmAbout">about this capture · fan site · multi-page</p>
+              </div>
+            </header>
+
+            <div class="wbm-frame" id="wbmFrame">
+              <iframe
+                class="wbm-embed"
+                id="wbmEmbed"
+                title="webring view"
+                hidden
+                referrerpolicy="no-referrer"
+              ></iframe>
+              <div class="wbm-embed-fail" id="wbmEmbedFail" hidden>
+                <p class="wbm-404-title">frame blocked</p>
+                <p class="wbm-404-msg" id="wbmEmbedFailMsg">esse site não deixa embutir. abre fora ou volta pro anel.</p>
+                <div class="tool-row">
+                  <a class="btn primary" id="wbmEmbedFailOpen" href="#" target="_blank" rel="noopener">abrir fora</a>
+                  <button type="button" class="btn" id="wbmEmbedFailBack">voltar ao anel</button>
+                </div>
+              </div>
+              <!-- 2009 fan site · multi-page -->
+              <div class="wbm-page on" data-wbm-page="2009" id="wbmPage2009">
+                <table class="wbm-site" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td class="wbm-banner" colspan="2">
+                      <marquee behavior="alternate" scrollamount="3">*** WELCOME TO PANCHIKO · NOTTINGHAM · DIY CD-R ***</marquee>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="wbm-side">
+                      <p class="wbm-hit">visitors<br /><button type="button" class="wbm-counter" id="wbmCounter" title="clica…">000028</button></p>
+                      <p class="wbm-midi">♪ now playing:<br /><em id="wbmMidiName">laputa_lofi.mid</em><br /><span class="wbm-midi-bar">||||||||····</span></p>
+                      <ul class="wbm-nav" id="wbmNav2009">
+                        <li><a href="#home" class="on" data-wbm-sub="home">home</a></li>
+                        <li><a href="#mp3s" data-wbm-sub="mp3s">mp3s</a></li>
+                        <li><a href="#photos" data-wbm-sub="photos">photos</a></li>
+                        <li><a href="#lyrics" data-wbm-sub="lyrics">lyrics</a></li>
+                        <li><a href="#guestbook" data-wbm-sub="guestbook">guestbook</a></li>
+                        <li><a href="#links" data-wbm-sub="links">links</a></li>
+                        <li><a href="#zine" data-wbm-sub="zine">zine</a></li>
+                        <li><a href="#contact" data-wbm-sub="contact">contact</a></li>
+                        <li><a href="#hidden" data-wbm-sub="hidden" class="wbm-nav-ghost">· · ·</a></li>
+                      </ul>
+                      <p class="wbm-badge">best viewed in<br /><strong>Netscape 4.7</strong></p>
+                    </td>
+                    <td class="wbm-main">
+                      <div class="wbm-sub on" data-wbm-subpage="home">
+                        <h1 class="wbm-h1">P A N C H I K O</h1>
+                        <p class="wbm-blink">under construction</p>
+                        <figure class="wbm-broken">
+                          <button type="button" class="wbm-missing" id="wbmMissing" aria-label="imagem quebrada oxfam_find.jpg">
+                            <span class="wbm-missing-ico" aria-hidden="true"></span>
+                            <em>oxfam_find.jpg</em>
+                            <small>404 · not archived</small>
+                          </button>
+                        </figure>
+                        <p class="wbm-body">
+                          We burned ~30 CD-Rs in a bedroom. If you found one in a charity shop —
+                          that was probably a mistake. Or fate. Anyway: <font color="#ff00aa">listen loud</font>.
+                        </p>
+                        <p class="wbm-body wbm-glitch-line">D&gt;E&gt;A&gt;T&gt;H&gt;M&gt;E&gt;T&gt;A&gt;L is <strike>death metal</strike> <b>weeb indietronica</b> thx</p>
+                        <pre class="wbm-html-leak">&lt;!-- TODO owain: re-rip laputa before the cdr rots --&gt;
+&lt;!-- mirror backup: /hidden/oxfam_note.txt --&gt;</pre>
+                        <p class="wbm-foot">
+                          © 2000–2009 panchiko ·
+                          <a href="#contact" data-wbm-sub="contact">email us</a>
+                          ·
+                          <button type="button" class="wbm-egg-dot" id="wbmEggDot" title="·" aria-label="ponto estranho">·</button>
+                        </p>
+                      </div>
+
+                      <div class="wbm-sub" data-wbm-subpage="mp3s" hidden>
+                        <h2 class="wbm-h2">mp3s · 64kbps or bust</h2>
+                        <p class="wbm-body">ripped on a Gateway. if it skips, that’s the disc — not your modem.</p>
+                        <table class="wbm-mp3-table">
+                          <tr><td>01</td><td>D&gt;E&gt;A&gt;T&gt;H&gt;M&gt;E&gt;T&gt;A&gt;L.mp3</td><td>3.8mb</td><td><button type="button" class="wbm-dl" data-wbm-dead="deathmetal.mp3">download</button></td></tr>
+                          <tr><td>02</td><td>Stabilisers_For_Big_Boys.mp3</td><td>3.6mb</td><td><button type="button" class="wbm-dl" data-wbm-dead="stabilisers.mp3">download</button></td></tr>
+                          <tr><td>03</td><td>Laputa.mp3</td><td>2.4mb</td><td><button type="button" class="wbm-dl" data-wbm-dead="laputa.mp3">download</button></td></tr>
+                          <tr><td>04</td><td>The_Eyes_Of_Ibad.mp3</td><td>5.9mb</td><td><button type="button" class="wbm-dl" data-wbm-dead="ibad.mp3">download</button></td></tr>
+                          <tr class="wbm-rot-row"><td>??</td><td>Laputa_ROTTING.wav</td><td>??</td><td><button type="button" class="wbm-dl" data-wbm-sub="hidden">???</button></td></tr>
+                        </table>
+                        <p class="wbm-hint">winamp skin recommended: classic · crossfade OFF</p>
+                      </div>
+
+                      <div class="wbm-sub" data-wbm-subpage="photos" hidden>
+                        <h2 class="wbm-h2">photos · scanner bed</h2>
+                        <p class="wbm-body">flatbed scans · 72dpi · don’t judge</p>
+                        <div class="wbm-photos">
+                          <figure>
+                            <img src="assets/album-deathmetal.jpg" alt="capa DIY" />
+                            <figcaption>cover_front_scan.jpg · ink still wet</figcaption>
+                          </figure>
+                          <figure class="wbm-photo-broke">
+                            <button type="button" class="wbm-missing" data-wbm-dead="rehearsal_01.jpg">
+                              <span class="wbm-missing-ico" aria-hidden="true"></span>
+                              <em>rehearsal_01.jpg</em>
+                              <small>broken tile</small>
+                            </button>
+                            <figcaption>practice room · not archived</figcaption>
+                          </figure>
+                          <figure class="wbm-photo-broke">
+                            <button type="button" class="wbm-missing" data-wbm-dead="oxfam_shelf.jpg">
+                              <span class="wbm-missing-ico" aria-hidden="true"></span>
+                              <em>oxfam_shelf.jpg</em>
+                              <small>403 · forbidden</small>
+                            </button>
+                            <figcaption>sherwood · maybe deleted on purpose</figcaption>
+                          </figure>
+                          <figure>
+                            <div class="wbm-photo-fake" aria-hidden="true">
+                              <span>CD-R</span>
+                              <em>tray open</em>
+                            </div>
+                            <figcaption>burner_cam.gif · animated once</figcaption>
+                          </figure>
+                          <figure class="wbm-photo-broke">
+                            <button type="button" class="wbm-missing" data-wbm-dead="band_polaroid.jpg">
+                              <span class="wbm-missing-ico" aria-hidden="true"></span>
+                              <em>band_polaroid.jpg</em>
+                              <small>404</small>
+                            </button>
+                            <figcaption>faces blurred by rot in the negative</figcaption>
+                          </figure>
+                          <figure>
+                            <div class="wbm-photo-fake wbm-photo-midi" aria-hidden="true">
+                              <span>♪</span>
+                              <em>midi_viz.bmp</em>
+                            </div>
+                            <figcaption>equalizer screenshot · winamp classic</figcaption>
+                          </figure>
+                        </div>
+                      </div>
+
+                      <div class="wbm-sub" data-wbm-subpage="lyrics" hidden>
+                        <h2 class="wbm-h2">lyrics · notebook spill</h2>
+                        <div class="wbm-lyrics-block">
+                          <h3>Laputa</h3>
+                          <pre>(half remembered · don’t quote us)
+
+floating city in my head
+tape hiss for a bed
+if the disc dies first
+we already said what we meant…</pre>
+                          <h3>Stabilisers For Big Boys</h3>
+                          <pre>training wheels off the stereo
+bass too loud for the neighbours
+don’t grow up — just reburn</pre>
+                          <h3>D&gt;E&gt;A&gt;T&gt;H&gt;M&gt;E&gt;T&gt;A&gt;L</h3>
+                          <pre>[instrumental enough · shout the title anyway]
+(owain wrote “death metal” as a joke
+and the joke stuck to the plastic)</pre>
+                          <h3>The Eyes of Ibad</h3>
+                          <pre>blue-within-blue / glitch in the eye
+dune paperback on the amp
+we mispronounce half of it live</pre>
+                          <p class="wbm-hint">full sheets “coming soon” · (2009 still waiting)</p>
+                        </div>
+                      </div>
+
+                      <div class="wbm-sub" data-wbm-subpage="guestbook" hidden>
+                        <h2 class="wbm-h2">guestbook</h2>
+                        <div class="wbm-gb wbm-gb-full">
+                          <p><b>andy_99</b> <span>02/08/09 22:11</span><br />sick demo lads. laputa lives in my head rent free</p>
+                          <p><b>xXshaunXx</b> <span>08/08/09 01:04</span><br />who left a copy at oxfam lol · sherwood branch??</p>
+                          <p><b>john_drums</b> <span>09/08/09 18:40</span><br />if ur reading this from a library computer: respect</p>
+                          <p><b>midi_kid</b> <span>10/08/09 12:02</span><br />got a 404 on the photo. upload again plz</p>
+                          <p class="wbm-gb-ghost"><b>????</b> <span>—/—/—</span><br /><button type="button" class="wbm-egg-link" id="wbmEggLink">…………</button></p>
+                        </div>
+                        <p class="wbm-body">
+                          <button type="button" class="wbm-dl" data-wbm-dead="guestbook_sign.cgi">sign guestbook</button>
+                          <span class="wbm-hint"> · form handler missing in archive</span>
+                        </p>
+                      </div>
+
+                      <div class="wbm-sub" data-wbm-subpage="links" hidden>
+                        <h2 class="wbm-h2">links · webrings · debris</h2>
+                        <ul class="wbm-linkdump">
+                          <li><a href="#wbm-dead" data-wbm-dead="http://www.angelfire.com/band/panchiko/">angelfire mirror (dead)</a></li>
+                          <li><a href="#wbm-dead" data-wbm-dead="http://www.mp3.com/panchiko">mp3.com artist page</a></li>
+                          <li><a href="#wbm-dead" data-wbm-dead="http://www.myspace.com/panchikouk">myspace · 12 friends</a></li>
+                          <li><a href="#wbm-dead" data-wbm-dead="http://www.nottinghamindiemusic.co.uk/">nottingham indie directory</a></li>
+                          <li><button type="button" class="wbm-egg-link" data-wbm-ring="pc">webring → Adri16bit PC desk</button></li>
+                          <li><button type="button" class="wbm-egg-link" data-wbm-sub="hidden">webring: lost cds of the east midlands →</button></li>
+                        </ul>
+                        <pre class="wbm-html-leak">ERROR: webring badge.gif failed to load
+referer blocked by archive crawler</pre>
+                      </div>
+
+                      <div class="wbm-sub" data-wbm-subpage="zine" hidden>
+                        <h2 class="wbm-h2">zine · issue 0</h2>
+                        <div class="wbm-zine">
+                          <article>
+                            <h3>HOW TO BURN A MYTH</h3>
+                            <p>1. write songs in a bedroom<br />2. print covers on a school printer<br />3. leave one in a charity shop by accident<br />4. wait twenty years</p>
+                          </article>
+                          <article>
+                            <h3>FAQ</h3>
+                            <p><b>is it death metal?</b> no<br /><b>is it finished?</b> also no<br /><b>can i have a copy?</b> ask oxfam</p>
+                          </article>
+                          <article>
+                            <h3>FIELD REPORT · SHERWOOD</h3>
+                            <p>saw our own disc in the £1 bin.<br />bought it back.<br />put it back again.<br />art needs circulation.</p>
+                          </article>
+                        </div>
+                      </div>
+
+                      <div class="wbm-sub" data-wbm-subpage="contact" hidden>
+                        <h2 class="wbm-h2">contact</h2>
+                        <p class="wbm-body">band@panchiko-deathmetal.co.uk</p>
+                        <p class="wbm-body">nottingham · uk · no manager · no label · no plan</p>
+                        <form class="wbm-form" id="wbmContactForm" action="#">
+                          <label>name <input type="text" maxlength="40" placeholder="anonymous" /></label>
+                          <label>msg <textarea rows="3" maxlength="200" placeholder="found your cdr…"></textarea></label>
+                          <button type="submit" class="wbm-dl">send (cgi)</button>
+                        </form>
+                        <p class="wbm-hint" id="wbmContactHint">smtp gateway not archived · mail goes nowhere</p>
+                      </div>
+
+                      <div class="wbm-sub" data-wbm-subpage="hidden" hidden>
+                        <h2 class="wbm-h2">/hidden/</h2>
+                        <p class="wbm-body">directory listing · index of /hidden/</p>
+                        <ul class="wbm-dir">
+                          <li><button type="button" class="wbm-egg-link" id="wbmEggFromDir">oxfam_note.txt</button> · 312b · 11 Aug 2009</li>
+                          <li><a href="#wbm-dead" data-wbm-dead="rot_sample.wav">rot_sample.wav</a> · corrupted</li>
+                          <li><a href="#wbm-dead" data-wbm-dead="store_receipt.scan">store_receipt.scan</a> · 403</li>
+                        </ul>
+                        <pre class="wbm-egg-note wbm-egg-inline">left the cdr by accident.
+if you find it — keep it spinning.
+
+— o.</pre>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- 2001 burn log -->
+              <div class="wbm-page" data-wbm-page="2001" id="wbmPage2001" hidden>
+                <div class="wbm-notepad">
+                  <p class="wbm-notepad-title">burn_session_14.txt — Notepad</p>
+                  <pre class="wbm-notepad-body">14 June 2001 · 23:41
+Nero Burning ROM · 32x · TAO
+
+TRACK LIST
+01 DEATHMETAL.WAV
+02 STABILISERS.WAV
+03 LAPUTA.WAV
+04 EYES_OF_IBAD.WAV
+
+covers: inkjet · paper jam twice
+batch: try for 30 discs
+label sharpie: D>E>A>T>H>M>E>T>A>L
+
+note to self:
+don’t leave extras at charity shops
+(owain will do it anyway)
+
+[session ended — tray open]</pre>
+                </div>
+              </div>
+
+              <!-- 2004 GeoCities -->
+              <div class="wbm-page" data-wbm-page="2004" id="wbmPage2004" hidden>
+                <div class="wbm-geo">
+                  <p class="wbm-geo-host">www.geocities.com/panchiko_uk · free homepage</p>
+                  <h1 class="wbm-geo-title">~ panchiko ~</h1>
+                  <p class="wbm-geo-blink">* new * midi added * new *</p>
+                  <div class="wbm-geo-cols">
+                    <div>
+                      <p>bedroom demo · nottingham</p>
+                      <p>tracks coming “soon” (lie)</p>
+                      <p><button type="button" class="wbm-dl" data-wbm-dead="hitcounter.cgi">hit counter: 000007</button></p>
+                    </div>
+                    <div class="wbm-geo-box">
+                      <p>THIS SITE IS UNDER</p>
+                      <p class="wbm-geo-big">CONSTRUCTION</p>
+                      <p>please don’t tell the charity shops</p>
+                    </div>
+                  </div>
+                  <p class="wbm-geo-foot">GeoCities will shut down. this page will too. burn a cdr while you can.</p>
+                </div>
+              </div>
+
+              <!-- 2007 MySpace -->
+              <div class="wbm-page" data-wbm-page="2007" id="wbmPage2007" hidden>
+                <div class="wbm-myspace">
+                  <div class="wbm-ms-top">
+                    <strong>MySpace.com</strong>
+                    <span>| a place for friends</span>
+                  </div>
+                  <div class="wbm-ms-grid">
+                    <aside>
+                      <img class="wbm-ms-pic" src="assets/album-deathmetal.jpg" alt="profile" />
+                      <p class="wbm-ms-name">Panchiko</p>
+                      <p class="wbm-ms-meta">Male · 19 · Nottingham, UK<br />Last Login: 9/22/2007</p>
+                      <p class="wbm-ms-stat">Profile Views: <b>142</b></p>
+                    </aside>
+                    <section>
+                      <h3>Tom is in your extended network</h3>
+                      <div class="wbm-ms-blurbs">
+                        <h4>About me:</h4>
+                        <p>bedroom band. we made a cd. somehow people keep finding it in shops we didn’t put it in.</p>
+                        <h4>I’d like to meet:</h4>
+                        <p>anyone with a clean rip before the disc dies</p>
+                      </div>
+                      <h4>Top 8 Friends</h4>
+                      <div class="wbm-ms-friends">
+                        <span>Tom</span><span>Andy</span><span>Shaun</span><span>John</span>
+                        <span>Owain</span><span>Laputa</span><span>Oxfam</span><span>???</span>
+                      </div>
+                      <h4>Music player</h4>
+                      <div class="wbm-ms-player">
+                        <button type="button" class="wbm-dl" data-wbm-dead="myspace_stream">▶ Laputa (lofi stream)</button>
+                        <em>flash required · not in archive</em>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2012 parked -->
+              <div class="wbm-page" data-wbm-page="2012" id="wbmPage2012" hidden>
+                <div class="wbm-park">
+                  <p class="wbm-park-domain">panchiko-deathmetal.co.uk</p>
+                  <h2>This domain is parked.</h2>
+                  <p>Related searches:</p>
+                  <ul>
+                    <li><button type="button" class="wbm-dl" data-wbm-dead="buy-domain">buy this domain</button></li>
+                    <li><button type="button" class="wbm-dl" data-wbm-dead="death-metal-bands">death metal bands uk</button></li>
+                    <li><button type="button" class="wbm-dl" data-wbm-dead="nottingham-charity-shops">nottingham charity shops</button></li>
+                  </ul>
+                  <p class="wbm-park-note">WHOIS: redacted · last update 2011 · no MX records · silence</p>
+                </div>
+              </div>
+
+              <!-- 2016 /mu/ -->
+              <div class="wbm-page" data-wbm-page="2016" id="wbmPage2016" hidden>
+                <div class="wbm-mu">
+                  <p class="wbm-mu-head">Anonymous 07/21/16(Thu)14:22:08 No.677·····</p>
+                  <p class="wbm-mu-body">
+                    found this cd at an oxfam in sherwood. artwork is diy as hell.
+                    audio is full of <span class="wbm-rot-word">disc rot</span>. anyone know the band?
+                    google returns nothing. filename on the burn was
+                    <code>D_E_A_T_H_M_E_T_A_L</code>
+                  </p>
+                  <p class="wbm-mu-foot">&gt;be me<br />&gt;open charity shop cd<br />&gt;accidentally start a four-year manhunt</p>
+                  <div class="wbm-mu-replies">
+                    <p><b>&gt;&gt;677····2</b> sounds like vaporwave on purpose</p>
+                    <p><b>&gt;&gt;677····3</b> nah that’s just a dying cdr mate</p>
+                    <p><b>&gt;&gt;677····7</b> discord when</p>
+                  </div>
+                  <button type="button" class="btn" data-jump="hunt">abrir HUNT</button>
+                </div>
+              </div>
+
+              <!-- 2017 YouTube comments -->
+              <div class="wbm-page" data-wbm-page="2017" id="wbmPage2017" hidden>
+                <div class="wbm-yt">
+                  <p class="wbm-yt-head">YouTube · D&gt;E&gt;A&gt;T&gt;H&gt;M&gt;E&gt;T&gt;A&gt;L (rotting rip) · comments</p>
+                  <div class="wbm-yt-video">
+                    <div class="wbm-yt-screen">
+                      <span>▶</span>
+                      <em>video unavailable in archive<br />audio fingerprint: disc-rot</em>
+                    </div>
+                    <p>128,403 views · Aug 9, 2017</p>
+                  </div>
+                  <div class="wbm-yt-comments">
+                    <p><b>rotwave_kid</b> this is the most beautiful decay i’ve ever heard</p>
+                    <p><b>mu_lurker</b> still no band name. i will die mad</p>
+                    <p><b>nottingham_local</b> oxfam in sherwood used to have a box of burned cds…</p>
+                    <p><b>vinyl_guy_99</b> upload a CLEAN version please my ears</p>
+                    <p><b>anon</b> discord link in description expired lol</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2018 discord paste -->
+              <div class="wbm-page" data-wbm-page="2018" id="wbmPage2018" hidden>
+                <div class="wbm-paste">
+                  <p class="wbm-paste-head">pastebin.com / raw / panchikord_leads.txt · 02 Feb 2018</p>
+                  <pre class="wbm-paste-body">PANCHIKORD — working notes (do not post on /mu/)
+
+- oxfam sherwood confirmed by phone (they don’t remember the donor)
+- sleeve handwriting: first names only
+- possible “Owain” + nottingham school records?
+- audio hashes of rot rips circulating in #rips
+- if you find a clean burn: UPLOAD BEFORE IT ROTS
+
+invite: discord.gg/········ (expired in archive)
+last editor: anon · 03:14 UTC</pre>
+                  <button type="button" class="btn" data-jump="hunt">voltar pra caçada</button>
+                </div>
+              </div>
+
+              <!-- 2019 phone log -->
+              <div class="wbm-page" data-wbm-page="2019" id="wbmPage2019" hidden>
+                <div class="wbm-phone">
+                  <p class="wbm-phone-head">call_log · Oxfam Sherwood · 11 Jan 2019</p>
+                  <div class="wbm-phone-script">
+                    <p><span class="wbm-who">FAN</span> hi — weird question — did you ever sell homemade CDs?</p>
+                    <p><span class="wbm-who shop">SHOP</span> …sometimes donations, love. years ago maybe?</p>
+                    <p><span class="wbm-who">FAN</span> black sleeve, handwritten, sounded like dying plastic?</p>
+                    <p><span class="wbm-who shop">SHOP</span> oh god. the noisy one. someone returned it saying it was broken.</p>
+                    <p><span class="wbm-who">FAN</span> do you remember who donated it?</p>
+                    <p><span class="wbm-who shop">SHOP</span> love, we don’t keep ghosts. try the internet.</p>
+                    <p class="wbm-phone-end">[call ended · 04:12]</p>
+                  </div>
+                  <button type="button" class="btn" data-jump="hunt">a caçada continua</button>
+                </div>
+              </div>
+
+              <!-- 2020 bandcamp scrape -->
+              <div class="wbm-page" data-wbm-page="2020" id="wbmPage2020" hidden>
+                <div class="wbm-bc">
+                  <p class="wbm-bc-nav">bandcamp · panchiko · archive scrape 16 Feb 2020</p>
+                  <div class="wbm-bc-hero">
+                    <img
+                      class="wbm-bc-cover"
+                      src="assets/album-deathmetal.jpg"
+                      alt="Capa D>E>A>T>H>M>E>T>A>L"
+                      width="112"
+                      height="112"
+                    />
+                    <div>
+                      <h2>D&gt;E&gt;A&gt;T&gt;H&gt;M&gt;E&gt;T&gt;A&gt;L</h2>
+                      <p>by Panchiko</p>
+                      <p class="wbm-bc-meta">digital album · includes ROT versions · name-your-price</p>
+                      <div class="tool-row">
+                        <button type="button" class="btn primary" data-jump="play">play on DEATHDECK</button>
+                        <a class="btn" href="https://panchiko.bandcamp.com/album/d-e-a-t-h-m-e-t-a-l" target="_blank" rel="noopener">open live Bandcamp</a>
+                      </div>
+                    </div>
+                  </div>
+                  <ol class="wbm-bc-tracks">
+                    <li>D&gt;E&gt;A&gt;T&gt;H&gt;M&gt;E&gt;T&gt;A&gt;L</li>
+                    <li>Stabilisers For Big Boys</li>
+                    <li>Laputa</li>
+                    <li>The Eyes of Ibad</li>
+                    <li>Kicking Cars <em>(bonus)</em></li>
+                    <li>…_R&gt;O&gt;T variants</li>
+                  </ol>
+                  <p class="wbm-hint">scrape note: comments flooded · “we found you” · band reply: wait what</p>
+                  <div class="wbm-bc-comments">
+                    <p><b>lostwave_survivor</b> — four years. four years.</p>
+                    <p><b>panchiko</b> — wait… people were looking for US?</p>
+                    <p><b>oxfam_ghost</b> — keep the ROT tracks. they’re history.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2021 wikipedia -->
+              <div class="wbm-page" data-wbm-page="2021" id="wbmPage2021" hidden>
+                <div class="wbm-wiki">
+                  <p class="wbm-wiki-nav">Wikipedia · Panchiko · revision 03 Mar 2021</p>
+                  <h1>Panchiko</h1>
+                  <p class="wbm-wiki-lead">
+                    <b>Panchiko</b> are an English indie band from Nottingham.
+                    Their 2000 demo <i>D&gt;E&gt;A&gt;T&gt;H&gt;M&gt;E&gt;T&gt;A&gt;L</i> became a lostwave
+                    after a degraded CD-R was posted to 4chan in 2016.
+                  </p>
+                  <table class="wbm-wiki-infobox">
+                    <tr><th colspan="2">Panchiko</th></tr>
+                    <tr><td colspan="2"><img src="assets/album-deathmetal.jpg" alt="album" /></td></tr>
+                    <tr><th>Origin</th><td>Nottingham, England</td></tr>
+                    <tr><th>Years</th><td>1997–2001; 2020–present</td></tr>
+                    <tr><th>Genres</th><td>Indie rock, shoegaze, indietronica</td></tr>
+                    <tr><th>Labels</th><td>(none originally)</td></tr>
+                  </table>
+                  <h2>Discovery</h2>
+                  <p>
+                    In July 2016 an anonymous user uploaded audio from a charity-shop CD-R
+                    suffering from <a href="#wbm-dead" data-wbm-dead="wiki-disc-rot">disc rot</a>.
+                    A multi-year search by fans (Panchikord) located the band in 2020.
+                  </p>
+                  <p class="wbm-wiki-warn">[citation needed] · [improve this article]</p>
+                  <button type="button" class="btn" data-jump="ep">abrir EP no deck</button>
+                </div>
+              </div>
+
+              <div class="wbm-404" id="wbmNoCap" hidden>
+                <p class="wbm-404-code">WAYBACK · NO CAPTURE</p>
+                <p class="wbm-404-msg" id="wbmNoCapMsg">This URL has not been archived for the selected date.</p>
+              </div>
+            </div>
+
+            <div class="wbm-egg" id="wbmEgg" hidden>
+              <p class="wbm-egg-kicker">side channel · /hidden/oxfam_note.txt</p>
+              <pre class="wbm-egg-note">left the cdr by accident.
+if you find it — keep it spinning.
+don’t clean the rot off.
+the hiss is part of the record now.
+
+— o.</pre>
+              <div class="tool-row">
+                <button type="button" class="btn primary" data-jump="play">ouvir o álbum</button>
+                <button type="button" class="btn" id="wbmEggClose">fechar nota</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BAND -->
+        <div class="pane" id="pane-band" data-pane="band">
+          <p class="eyebrow">nottingham, uk · fotos oficiais / press</p>
+          <h2 class="section-title">A banda</h2>
+          <div class="member-grid">
+            <div class="member"><strong>Owain Davies</strong><span>guitar · vox · sampling</span></div>
+            <div class="member"><strong>Andy Wright</strong><span>guitar · sequencing · engineering</span></div>
+            <div class="member"><strong>Shaun Ferreday</strong><span>bass · programming · FX</span></div>
+            <div class="member"><strong>John Schofield</strong><span>drums · sequencing (era original)</span></div>
+            <div class="member"><strong>Rob Harris</strong><span>formação atual</span></div>
+          </div>
+          <div class="photo-grid">
+            <figure>
+              <img src="assets/band-1.jpg" alt="Panchiko — foto press (panchiko.net)" />
+              <figcaption>press · panchiko.net</figcaption>
+            </figure>
+            <figure>
+              <img src="assets/band-2.webp" alt="Panchiko — foto press" />
+              <figcaption>press · panchiko.net</figcaption>
+            </figure>
+            <figure>
+              <img src="assets/live-fonda.png" alt="Panchiko ao vivo — Fonda Theatre (Wikimedia)" />
+              <figcaption>live · Fonda Theatre · Wikimedia Commons</figcaption>
+            </figure>
+            <figure>
+              <img src="assets/live-guardian.jpg" alt="Panchiko ao vivo" />
+              <figcaption>live · via panchiko.net / press</figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <!-- ROT -->
+        <div class="pane" id="pane-rot" data-pane="rot">
+          <p class="eyebrow">não era efeito · era o CD morrendo</p>
+          <h2 class="section-title">D&gt;I&gt;S&gt;C&gt; &gt; R&gt;O&gt;T</h2>
+          <p class="lede short">O chiado que viralizou no YouTube era corrosão do CD-R. Fãs acharam “vaporwave”; era só plástico velho. O reissue trouxe as faixas limpas <em>e</em> as versões R&gt;O&gt;T de propósito.</p>
+          <canvas id="rotCanvas" width="640" height="180"></canvas>
+          <div class="tool-row">
+            <button type="button" class="btn primary" id="rotPulse">corrupt signal</button>
+            <span class="hint-line" id="rotHint">simulação visual do rip podre</span>
+          </div>
+          <div class="track-list compact">
+            <a class="track" href="https://panchiko.bandcamp.com/track/d-e-a-t-h-m-e-t-a-l-r-o-t" target="_blank" rel="noopener">
+              <span>R</span><strong>D&gt;E&gt;A&gt;T&gt;H&gt;M&gt;E&gt;T&gt;A&gt;L_R&gt;O&gt;T</strong><em>Bandcamp</em>
+            </a>
+            <a class="track" href="https://panchiko.bandcamp.com/track/laputa-r-o-t" target="_blank" rel="noopener">
+              <span>R</span><strong>Laputa_R&gt;O&gt;T</strong><em>Bandcamp</em>
+            </a>
+          </div>
+        </div>
+
+        <!-- DISCO -->
+        <div class="pane" id="pane-disco" data-pane="disco">
+          <p class="eyebrow">bandcamp oficial · capas oficiais</p>
+          <h2 class="section-title">Discografia</h2>
+          <p class="lede short">Principais releases no Bandcamp. Clica pra ouvir / comprar na fonte.</p>
+          <div class="disco-grid">
+            <a class="disco-card" href="https://panchiko.bandcamp.com/album/d-e-a-t-h-m-e-t-a-l" target="_blank" rel="noopener">
+              <img src="assets/album-deathmetal.jpg" alt="Capa D>E>A>T>H>M>E>T>A>L" />
+              <strong>D&gt;E&gt;A&gt;T&gt;H&gt;M&gt;E&gt;T&gt;A&gt;L</strong>
+              <span>2000 · reissue 2020</span>
+            </a>
+            <a class="disco-card" href="https://panchiko.bandcamp.com/album/ferric-oxide-demos-1997-2001" target="_blank" rel="noopener">
+              <img src="assets/album-ferric.jpg" alt="Capa Ferric Oxide" />
+              <strong>Ferric Oxide</strong>
+              <span>demos 1997–2001</span>
+            </a>
+            <a class="disco-card" href="https://panchiko.bandcamp.com/album/d-e-l-u-x-e-m-e-t-a-l" target="_blank" rel="noopener">
+              <img src="assets/album-deluxe.jpg" alt="Capa D>E>L>U>X>E>M>E>T>A>L" />
+              <strong>D&gt;E&gt;L&gt;U&gt;X&gt;E&gt;M&gt;E&gt;T&gt;A&gt;L</strong>
+              <span>expansão do clássico</span>
+            </a>
+            <a class="disco-card" href="https://panchiko.bandcamp.com/album/the-death-of-panchiko" target="_blank" rel="noopener">
+              <img src="assets/album-death-of.jpg" alt="Capa The Death of Panchiko" />
+              <strong>THE DEATH OF — PANCHIKO</strong>
+              <span>EP · pós-reunião</span>
+            </a>
+            <a class="disco-card" href="https://panchiko.bandcamp.com/album/failed-at-math-s" target="_blank" rel="noopener">
+              <img src="assets/album-failed.jpg" alt="Capa Failed At Math(s)" />
+              <strong>Failed At Math(s)</strong>
+              <span>álbum · 2023</span>
+            </a>
+            <a class="disco-card" href="https://panchiko.bandcamp.com/album/ginkgo" target="_blank" rel="noopener">
+              <img src="assets/album-ginkgo.jpg" alt="Capa Ginkgo" />
+              <strong>Ginkgo</strong>
+              <span>álbum · 2025</span>
+            </a>
+            <a class="disco-card" href="https://panchiko.bandcamp.com/album/panchiko-live-in-nottingham" target="_blank" rel="noopener">
+              <img src="assets/album-live-nottingham.jpg" alt="Capa Live in Nottingham" />
+              <strong>Live in Nottingham</strong>
+              <span>ao vivo · casa</span>
+            </a>
+            <a class="disco-card disco-more" href="https://panchiko.bandcamp.com/" target="_blank" rel="noopener">
+              <strong>Ver tudo no Bandcamp →</strong>
+              <span>singles, live, R&gt;O&gt;T…</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- PLAY · álbum completo -->
+        <div class="pane" id="pane-play" data-pane="play">
+          <div class="play-head">
+            <div>
+              <p class="eyebrow">álbum completo · stream Bandcamp oficial</p>
+              <h2 class="section-title">D&gt;E&gt;A&gt;T&gt;H&gt;M&gt;E&gt;T&gt;A&gt;L</h2>
+              <p class="lede short">Todas as 11 faixas — limpas + R&gt;O&gt;T. Toca direto daqui, com avanço automático.</p>
+            </div>
+            <a class="btn" href="https://panchiko.bandcamp.com/album/d-e-a-t-h-m-e-t-a-l" target="_blank" rel="noopener">Bandcamp ↗</a>
+          </div>
+
+          <div class="play-layout">
+            <div class="play-stage">
+              <figure class="play-cover">
+                <img src="assets/album-deathmetal.jpg" alt="Capa D>E>A>T>H>M>E>T>A>L" id="playCover" />
+              </figure>
+              <div class="play-now">
+                <p class="play-now-label" id="playNowLabel">pronto</p>
+                <strong id="playNowTitle">D&gt;E&gt;A&gt;T&gt;H&gt;M&gt;E&gt;T&gt;A&gt;L</strong>
+                <div class="play-progress">
+                  <input type="range" id="playSeek" min="0" max="1000" value="0" step="1" aria-label="posição" />
+                  <div class="play-times">
+                    <span id="playCur">0:00</span>
+                    <span id="playDur">0:00</span>
+                  </div>
+                </div>
+                <div class="play-controls">
+                  <button type="button" class="btn" id="playPrev" aria-label="anterior">⏮</button>
+                  <button type="button" class="btn primary" id="playToggle" aria-label="play/pause">▶ play</button>
+                  <button type="button" class="btn" id="playNext" aria-label="próxima">⏭</button>
+                </div>
+                <div class="play-viz-wrap">
+                  <canvas id="playViz" width="640" height="120" aria-hidden="true"></canvas>
+                  <div class="play-viz-modes" id="playVizModes">
+                    <button type="button" class="btn fx-btn on" data-viz="bars">bars</button>
+                    <button type="button" class="btn fx-btn" data-viz="wave">wave</button>
+                    <button type="button" class="btn fx-btn" data-viz="rot">rot</button>
+                  </div>
+                </div>
+                <p class="hint-line" id="playHint">carregando faixas do Bandcamp…</p>
+              </div>
+              <audio id="playAudio" preload="none" crossorigin="anonymous"></audio>
+            </div>
+
+            <ol class="play-tracks" id="playTracks"></ol>
+          </div>
+        </div>
+
+        <!-- LINK / CD-R -->
+        <div class="pane" id="pane-link" data-pane="link">
+          <div class="quick-chips" id="quickChips">
+            <button type="button" data-prompt="Conta a história do CD do Oxfam e do /mu/ em 5 frases.">oxfam</button>
+            <button type="button" data-prompt="O que é disc rot e por que o Panchiko viralizou com isso?">disc rot</button>
+            <button type="button" data-prompt="Me fala das faixas do EP original D>E>A>T>H>M>E>T>A>L.">faixas</button>
+            <button type="button" data-prompt="Escreve 4 linhas no clima Laputa / shoegaze triste.">letra</button>
+          </div>
+          <div class="link-layout">
+            <div class="ai-feed" id="aiFeed"></div>
+            <form class="ai-form" id="aiForm">
+              <input id="aiInput" placeholder="perguntar ao CD-R…" autocomplete="off" maxlength="2000" />
+              <button type="submit" class="btn primary">TX</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- COMMS -->
+        <div class="pane" id="pane-comms" data-pane="comms">
+          <div id="commsLobby" class="comms-lobby">
+            <p class="eyebrow">panchikord energy · até 10 no canal</p>
+            <p class="lede">Canal pra quem estiver na caçada — tipo Discord mínimo, até 10 pessoas.</p>
+            <div class="comms-profile" id="commsProfile">
+              <button type="button" class="comms-profile-puck" id="commsAvatarBtn" title="foto de perfil" aria-label="escolher foto de perfil">
+                <img id="commsAvatarPreview" alt="" hidden />
+                <span class="comms-profile-fallback" id="commsAvatarFallback">?</span>
+              </button>
+              <div class="comms-profile-meta">
+                <span class="comms-profile-label">foto de perfil</span>
+                <div class="comms-profile-actions">
+                  <button type="button" class="btn" id="commsAvatarPick">escolher</button>
+                  <button type="button" class="btn" id="commsAvatarClear" hidden>remover</button>
+                </div>
+                <em class="comms-profile-hint">opcional · aparece na call e no canal</em>
+              </div>
+              <input type="file" id="commsAvatarFile" accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif" hidden />
+            </div>
+            <label class="comms-lab">nick
+              <input id="commsName" name="deck_callsign" maxlength="24" placeholder="ex: adri16bit" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other" required />
+            </label>
+            <label class="comms-lab" for="commsMaxPeers">pessoas no canal
+              <select id="commsMaxPeers" aria-label="máximo de pessoas no canal">
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4" selected>4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+              </select>
+            </label>
+            <label class="comms-cdr-opt" for="commsAddCdr">
+              <input type="checkbox" id="commsAddCdr" checked />
+              <span>
+                <strong>adicionar CD-R</strong>
+                <em>sempre no canal · responde com <code>/mensagem</code> · pede música no papo</em>
+              </span>
+            </label>
+            <div class="tool-row">
+              <button type="button" class="btn primary" id="commsCreate">abrir canal</button>
+            </div>
+            <div class="tool-row">
+              <input id="commsJoinCode" maxlength="8" placeholder="código" autocomplete="off" />
+              <button type="button" class="btn" id="commsJoin">entrar</button>
+            </div>
+            <div class="tool-row" id="commsResumeRow" hidden>
+              <button type="button" class="btn primary" id="commsResume">voltar ao canal</button>
+            </div>
+            <p class="hint-line" id="commsLobbyHint">escolhe quantas pessoas · username obrigatório</p>
+          </div>
+          <div id="commsRoom" class="comms-room" hidden>
+            <div class="comms-wall" id="commsWall" hidden aria-hidden="true"></div>
+            <div class="comms-room-brand">
+              <p class="comms-brand">Panchiko</p>
+              <p class="comms-model" id="commsRoomModel">L&gt;I&gt;V&gt;E&gt;L&gt;I&gt;N&gt;K</p>
+            </div>
+            <div class="comms-top">
+              <div class="comms-top-main">
+                <div class="comms-peers" id="commsPeers">…</div>
+              </div>
+              <div class="comms-top-actions">
+                <div class="comms-call-wrap" id="commsCallWrap">
+                  <button type="button" class="btn" id="commsCallBtn" title="ligação de voz" aria-label="ligação de voz" aria-pressed="false">
+                    <svg class="comms-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="16" height="16">
+                      <path fill="currentColor" d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1.1-.2 1.2.4 2.5.6 3.8.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.7 21 3 13.3 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.6.6 3.8.1.4 0 .8-.3 1.1L6.6 10.8z"/>
+                    </svg>
+                  </button>
+                  <div class="comms-call-bubble" id="commsCallBubble" hidden>
+                    <p class="comms-call-bubble-text" id="commsCallBubbleText">ligação…</p>
+                    <div class="comms-call-bubble-actions" id="commsCallBubbleActions" hidden>
+                      <button type="button" class="btn call-decline" id="commsCallDecline">recusar</button>
+                      <button type="button" class="btn call-accept" id="commsCallAccept">entrar</button>
+                    </div>
+                  </div>
+                </div>
+                <button type="button" class="btn" id="commsMoreBtn" aria-expanded="false" aria-controls="commsMorePanel" title="mais opções">⋯</button>
+                <button type="button" class="btn" id="commsLeave" title="encerrar">sair</button>
+              </div>
+            </div>
+            <div class="comms-now" id="commsNowPlaying" hidden aria-live="polite"></div>
+            <div class="comms-call-bar" id="commsCallBar" hidden>
+              <div class="comms-call-bar-top">
+                <span class="comms-call-dot" aria-hidden="true"></span>
+                <span class="comms-call-label" id="commsCallLabel">ligação</span>
+                <span class="comms-call-timer" id="commsCallTimer">0:00</span>
+                <button type="button" class="btn" id="commsCallMute" aria-pressed="false" title="mutar só o seu microfone">mutar mic</button>
+                <button type="button" class="btn call-hang" id="commsCallHang">desligar</button>
+              </div>
+              <div class="comms-call-people" id="commsCallPeople" aria-live="polite"></div>
+            </div>
+            <div class="lyrics-enable" id="commsLyricsEnable" hidden>
+              <button type="button" class="lyrics-enable-btn" id="commsLyricsEnableBtn">
+                ativar letras
+              </button>
+            </div>
+            <div class="lyrics-panel" id="commsLyrics" hidden aria-live="polite">
+              <div class="lyrics-head">
+                <strong class="lyrics-title">letras</strong>
+                <button type="button" class="lyrics-unsync-btn" id="commsLyricsUnsyncBtn" hidden>
+                  letras não sincronizadas?
+                </button>
+              </div>
+              <div class="lyrics-body" id="commsLyricsBody"></div>
+            </div>
+            <div class="comms-more-panel" id="commsMorePanel" hidden>
+              <p class="comms-more-code">canal <strong id="commsCodeLabel">———</strong></p>
+              <button type="button" class="btn" id="commsQrBtn">QR</button>
+              <button type="button" class="btn" id="commsCopy" title="copiar código">código</button>
+              <button type="button" class="btn" id="commsCopyUrl" title="copiar link completo">link</button>
+              <button type="button" class="btn" id="commsSpotifyBtn" title="conectar Spotify Premium">
+                Spotify
+              </button>
+              <button type="button" class="btn" id="commsVisualBtn" title="estilo do chat">visual</button>
+            </div>
+            <div class="comms-qr-panel" id="commsQrPanel" hidden>
+              <div id="commsQrBox" aria-label="QR do canal"></div>
+              <p class="hint-line" id="commsQrHint">escaneia pra entrar no canal</p>
+              <div class="tool-row" style="margin:0.35rem 0 0">
+                <button type="button" class="btn" id="commsQrCopyUrl">copiar URL</button>
+                <button type="button" class="btn" id="commsQrClose">fechar QR</button>
+              </div>
+            </div>
+
+            <div class="comms-feed-shell">
+              <div class="comms-call-sync" id="commsCallSync" hidden aria-live="polite" aria-busy="true">
+                <div class="comms-call-sync-card">
+                  <div class="comms-call-sync-orb" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <p class="comms-call-sync-kicker">COMMS · sync</p>
+                  <strong class="comms-call-sync-text" id="commsCallSyncText">sincronizando…</strong>
+                  <ul class="comms-call-sync-steps" id="commsCallSyncSteps">
+                    <li data-sync-step="1">microfone</li>
+                    <li data-sync-step="2">conexão</li>
+                    <li data-sync-step="3">áudio</li>
+                    <li data-sync-step="4">pronto</li>
+                  </ul>
+                  <div class="comms-call-sync-bar" aria-hidden="true"><i></i></div>
+                </div>
+              </div>
+              <div class="comms-feed" id="commsFeed">
+                <div class="comms-typing" id="commsTyping" hidden aria-live="polite"></div>
+              </div>
+              <button type="button" class="comms-new-msg" id="commsNewMsg" hidden aria-label="ir para mensagens recentes">
+                <span aria-hidden="true">↓</span>
+                <em id="commsNewMsgLabel">nova</em>
+              </button>
+            </div>
+            <div class="comms-reply-bar" id="commsReplyBar" hidden>
+              <div class="comms-reply-meta">
+                <span>↩ respondendo</span>
+                <strong id="commsReplyName"></strong>
+                <em id="commsReplyPreview"></em>
+              </div>
+              <button type="button" class="btn" id="commsReplyClear" aria-label="cancelar reply">×</button>
+            </div>
+            <div class="comms-attach-bar" id="commsAttachBar" hidden>
+              <div class="comms-attach-list" id="commsAttachList"></div>
+              <button type="button" class="btn" id="commsAttachClear" aria-label="remover imagens">limpar</button>
+            </div>
+            <div class="comms-voice-bar" id="commsVoiceBar" hidden>
+              <span class="comms-voice-dot" aria-hidden="true"></span>
+              <span class="comms-voice-timer" id="commsVoiceTimer">0:00</span>
+              <span class="comms-voice-hint" id="commsVoiceHint">gravando áudio…</span>
+              <button type="button" class="btn" id="commsVoiceCancel" aria-label="cancelar gravação">cancelar</button>
+              <button type="button" class="btn primary" id="commsVoiceSend" aria-label="enviar áudio">enviar</button>
+            </div>
+            <div class="comms-stickers" id="commsStickers" hidden></div>
+            <form class="ai-form comms-compose" id="commsForm" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
+              <button type="button" class="btn comms-ico-btn" id="commsStickerBtn" title="stickers" aria-label="stickers">
+                <svg class="comms-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                  <circle cx="9" cy="10" r="1.15" fill="currentColor"/>
+                  <circle cx="15" cy="10" r="1.15" fill="currentColor"/>
+                  <path d="M8.5 14.25c1.1 1.35 2.2 2 3.5 2s2.4-.65 3.5-2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                </svg>
+              </button>
+              <label class="btn comms-file-btn comms-ico-btn" title="imagens / gif" aria-label="enviar imagens ou gif">
+                <svg class="comms-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <rect x="3.5" y="5.5" width="17" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                  <circle cx="9" cy="10.25" r="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M3.75 16.5l4.5-4.25 3.1 2.9 3.4-3.9 5.5 5.25" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input type="file" id="commsFile" accept="image/*,.gif,image/gif" multiple hidden />
+              </label>
+              <button type="button" class="btn comms-ico-btn" id="commsVoiceBtn" title="mensagem de voz" aria-label="mensagem de voz" aria-pressed="false">
+                <svg class="comms-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <rect x="9" y="3.5" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                  <path d="M6.5 11.5a5.5 5.5 0 0 0 11 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                  <path d="M12 17v3.2M9 20.2h6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                </svg>
+              </button>
+              <input
+                id="commsInput"
+                name="deck_chat_body"
+                type="text"
+                inputmode="text"
+                enterkeyhint="send"
+                placeholder="mensagem… cola/anexa imagens ou gif"
+                autocomplete="off"
+                autocapitalize="sentences"
+                autocorrect="on"
+                spellcheck="true"
+                data-lpignore="true"
+                data-1p-ignore="true"
+                data-form-type="other"
+                maxlength="1000"
+              />
+              <button type="submit" class="btn primary">TX</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- APP / instalar no celular -->
+        <div class="pane" id="pane-app" data-pane="app">
+          <p class="eyebrow">home screen · PWA</p>
+          <h2 class="section-title">Instala o DEATHDECK</h2>
+          <p class="lede" id="deckAppLead">
+            Se fechou o aviso sem querer, instala por aqui. Fica na home como app — mais rápido e tela cheia.
+          </p>
+          <div class="deck-app-card" id="deckAppCard">
+            <div class="deck-app-icon" aria-hidden="true">
+              <img src="assets/favicon.jpg?v=2" alt="" />
+            </div>
+            <div class="deck-app-meta">
+              <strong>Deathdeck</strong>
+              <em id="deckAppStatus">checando…</em>
+            </div>
+          </div>
+          <ul class="deck-app-steps" id="deckAppSteps"></ul>
+          <div class="tool-row deck-app-actions">
+            <button type="button" class="btn primary" id="deckAppInstall">instalar</button>
+          </div>
+          <p class="hint-line" id="deckAppHint">Android e iPhone · HTTPS</p>
+        </div>
+
+        <!-- OUT / links oficiais -->
+        <div class="pane" id="pane-out" data-pane="out">
+          <p class="eyebrow">oficial</p>
+          <h2 class="section-title">Sai do deck · vai na fonte</h2>
+          <div class="out-links">
+            <a class="btn primary" href="https://panchiko.bandcamp.com/" target="_blank" rel="noopener">Bandcamp</a>
+            <a class="btn" href="https://panchiko.net/" target="_blank" rel="noopener">panchiko.net</a>
+            <a class="btn" href="https://panchiko.net/bits-n-bobs" target="_blank" rel="noopener">Bits ‘n’ Bobs (press)</a>
+            <a class="btn" href="https://www.instagram.com/panchiko_deathmetal" target="_blank" rel="noopener">Instagram</a>
+            <a class="btn" href="https://en.wikipedia.org/wiki/Panchiko" target="_blank" rel="noopener">Wikipedia</a>
+          </div>
+          <figure class="out-mark">
+            <img src="assets/logo-official.png" alt="Logo oficial Panchiko" />
+            <figcaption>logo · panchiko.net · este deck é tributo, sem afiliação</figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <footer class="rail">
+        <div class="led on" id="powerLed"></div>
+        <span class="rail-label">OWAIN · ANDY · SHAUN · JOHN · ~30 CD-Rs</span>
+        <span class="rail-right" id="netPill">LINK IDLE</span>
+      </footer>
+    </section>
+
+    <aside class="grip grip-r" aria-hidden="true"></aside>
+  </main>
+
+  <p class="foot">imagens: Bandcamp, panchiko.net, Wikimedia Commons · tributo sem afiliação</p>
+
+  <div id="deckToast" class="deck-toast" hidden role="status" aria-live="polite"></div>
+
+  <audio id="commsRadioAudio" preload="none" playsinline webkit-playsinline hidden></audio>
+  <div id="commsYtHost" class="comms-yt-host" aria-hidden="true"></div>
+
+  <div class="deck-fs-tip" id="deckFsTip" hidden>
+    <div class="deck-fs-tip-card" role="dialog" aria-labelledby="deckFsTipTitle" aria-modal="true">
+      <p class="deck-fs-tip-kicker">aviso · chrome mobile</p>
+      <h2 id="deckFsTipTitle" class="deck-fs-tip-title">tela cheia ok, mas…</h2>
+      <p class="deck-fs-tip-body">
+        no Chrome mobile pode aparecer a barra preta de
+        <strong>preenchimento automático</strong> (chave / cartão / local).
+        isso vem do próprio navegador — o site não controla.
+      </p>
+      <a
+        class="deck-fs-tip-opera"
+        href="https://play.google.com/store/apps/details?id=com.opera.gx"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <span class="opera-gx-mark" aria-hidden="true">
+          <i class="opera-gx-o"></i>
+          <b>GX</b>
+          <em>OPERA</em>
+        </span>
+        <span class="deck-fs-tip-copy">
+          <strong>recomendo: Opera GX</strong>
+          <em>menos barra fantasma · baixar na Play Store</em>
+        </span>
+      </a>
+      <button type="button" class="btn primary" id="deckFsTipOk">entendi</button>
+    </div>
+  </div>
+
+  <div class="deck-fs-tip lyrics-tip" id="commsLyricsTip" hidden>
+    <div class="deck-fs-tip-card" role="dialog" aria-labelledby="commsLyricsTipTitle" aria-modal="true">
+      <p class="deck-fs-tip-kicker">aviso · letras</p>
+      <h2 id="commsLyricsTipTitle" class="deck-fs-tip-title">algumas letras podem não estar sincronizadas</h2>
+      <p class="deck-fs-tip-body">
+        a gente busca letra em bases públicas (tipo LRCLIB). nem toda faixa vem com
+        <strong>timestamps</strong> batendo no áudio — às vezes só tem o texto solto.
+        no YouTube isso é ainda mais comum: título sujo, duração diferente, cover, live ou remaster.
+      </p>
+      <p class="deck-fs-tip-body">
+        sem sync, a letra fica pra rolar na mão (e dá pra abrir o visualizer).
+        com sync, a linha atual acompanha o play.
+      </p>
+      <button type="button" class="btn primary" id="commsLyricsTipOk">entendi</button>
+    </div>
+  </div>
+
+  <div class="deck-fs-tip lyrics-tip" id="commsSpotifyTip" hidden>
+    <div class="deck-fs-tip-card" role="dialog" aria-labelledby="commsSpotifyTipTitle" aria-modal="true">
+      <p class="deck-fs-tip-kicker">setup · Spotify</p>
+      <h2 id="commsSpotifyTipTitle" class="deck-fs-tip-title">falta ligar o app no server</h2>
+      <p class="deck-fs-tip-body">
+        as chaves Spotify não chegaram no server (env vars / redeploy).
+      </p>
+      <p class="deck-fs-tip-body">
+        no <strong>Railway</strong> (produção), Redirect URI:
+        <code class="spotify-uri-hint">https://web-production-38344.up.railway.app/api/deck/spotify/callback</code>
+      </p>
+      <p class="deck-fs-tip-body">
+        no PC (só local), Redirect URI é localhost — <em>não é o teu IP da internet</em>:
+        <code class="spotify-uri-hint">http://localhost:9756/api/deck/spotify/callback</code>
+      </p>
+      <p class="deck-fs-tip-body">
+        Variables no Railway: <code>SPOTIFY_CLIENT_ID</code>, <code>SPOTIFY_CLIENT_SECRET</code>,
+        <code>SPOTIFY_REDIRECT_URI</code> (a URL HTTPS de cima). Depois redeploy.
+      </p>
+      <p class="deck-fs-tip-body">precisa de <strong>Spotify Premium</strong> pra tocar no browser.</p>
+      <button type="button" class="btn primary" id="commsSpotifyTipOk">entendi</button>
+    </div>
+  </div>
+
+  <div class="deck-fs-tip lyrics-tip" id="commsSpotifyConnectTip" hidden>
+    <div class="deck-fs-tip-card" role="dialog" aria-labelledby="commsSpotifyConnectTitle" aria-modal="true">
+      <p class="deck-fs-tip-kicker">Spotify · conectar</p>
+      <h2 id="commsSpotifyConnectTitle" class="deck-fs-tip-title">ligar o Spotify no canal?</h2>
+      <p class="deck-fs-tip-body">
+        com <strong>Premium</strong> conectado você ganha:
+      </p>
+      <ul class="deck-fs-tip-list">
+        <li>tocar a faixa oficial no player do site (não só YouTube)</li>
+        <li>pedidos do CD-R / sync com qualidade Spotify</li>
+        <li>“se juntar” no play de outra pessoa pelo Spotify</li>
+        <li>letras e posição mais estáveis enquanto rola a música</li>
+      </ul>
+      <p class="deck-fs-tip-body">
+        sem isso, o canal ainda funciona — mas o play cai no <strong>YouTube</strong>.
+      </p>
+      <div class="deck-fs-tip-actions">
+        <button type="button" class="btn" id="commsSpotifyConnectCancel">agora não</button>
+        <button type="button" class="btn primary" id="commsSpotifyConnectOk">conectar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="deck-fs-tip lyrics-tip" id="commsSpotifyDisconnectTip" hidden>
+    <div class="deck-fs-tip-card" role="dialog" aria-labelledby="commsSpotifyDisconnectTitle" aria-modal="true">
+      <p class="deck-fs-tip-kicker">Spotify · desconectar</p>
+      <h2 id="commsSpotifyDisconnectTitle" class="deck-fs-tip-title">sair do Spotify mesmo?</h2>
+      <p class="deck-fs-tip-body">
+        se desconectar, você <strong>perde</strong>:
+      </p>
+      <ul class="deck-fs-tip-list">
+        <li>tocar Spotify Premium no player do canal</li>
+        <li>sync / “se juntar” via Spotify</li>
+        <li>pedidos oficiais do CD-R no Spotify (volta pro YouTube)</li>
+      </ul>
+      <p class="deck-fs-tip-body">
+        dá pra conectar de novo depois — mas o login some deste browser agora.
+      </p>
+      <div class="deck-fs-tip-actions">
+        <button type="button" class="btn" id="commsSpotifyDisconnectCancel">ficar conectado</button>
+        <button type="button" class="btn primary" id="commsSpotifyDisconnectOk">desconectar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="deck-fs-tip lyrics-tip" id="commsVisualTip" hidden>
+    <div class="deck-fs-tip-card comms-visual-card" role="dialog" aria-labelledby="commsVisualTitle" aria-modal="true">
+      <p class="deck-fs-tip-kicker">COMMS · visual</p>
+      <h2 id="commsVisualTitle" class="deck-fs-tip-title">personalizar o COMMS</h2>
+
+      <div class="comms-visual-scroll">
+        <p class="comms-visual-label">balão · você</p>
+        <div class="comms-visual-opts" id="commsBubbleMeOpts" role="group" aria-label="seu balão">
+          <button type="button" class="comms-visual-opt" data-bubble-pack="base" data-bubble-me="classic">clássico</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="base" data-bubble-me="soft">suave</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="base" data-bubble-me="candy">doce</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="base" data-bubble-me="ghost">fantasma</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="rose" data-bubble-me="petal" hidden>pétala</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="rose" data-bubble-me="blush" hidden>blush</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="rose" data-bubble-me="bow" hidden>laço</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="rose" data-bubble-me="heart" hidden>coração</button>
+        </div>
+
+        <p class="comms-visual-label">balão · outra pessoa</p>
+        <div class="comms-visual-opts" id="commsBubbleThemOpts" role="group" aria-label="balão da outra pessoa">
+          <button type="button" class="comms-visual-opt" data-bubble-pack="base" data-bubble-them="classic">clássico</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="base" data-bubble-them="soft">suave</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="base" data-bubble-them="candy">doce</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="base" data-bubble-them="ghost">fantasma</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="rose" data-bubble-them="petal" hidden>pétala</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="rose" data-bubble-them="blush" hidden>blush</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="rose" data-bubble-them="bow" hidden>laço</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="rose" data-bubble-them="heart" hidden>coração</button>
+        </div>
+
+        <p class="comms-visual-label">tema da sala</p>
+        <div class="comms-visual-opts" id="commsThemeOpts" role="group" aria-label="tema da sala">
+          <button type="button" class="comms-visual-opt" data-theme="paper">papel</button>
+          <button type="button" class="comms-visual-opt" data-theme="ocean">oceano</button>
+          <button type="button" class="comms-visual-opt" data-theme="rose">rosa</button>
+          <button type="button" class="comms-visual-opt" data-theme="dusk">crepúsculo</button>
+          <button type="button" class="comms-visual-opt" data-theme="night">noite</button>
+        </div>
+
+        <p class="comms-visual-label">papel de parede</p>
+        <p class="comms-visual-paper-lock" id="commsPaperLockHint" hidden>
+          tema papel · wallpaper bloqueado · só balão clássico
+        </p>
+        <div class="comms-visual-wall-row">
+          <label class="btn comms-visual-wall-pick">
+            escolher foto
+            <input type="file" id="commsWallFile" accept="image/*" hidden />
+          </label>
+          <button type="button" class="btn" id="commsWallClear">remover</button>
+        </div>
+        <div class="comms-visual-wall-edit" id="commsWallEdit">
+          <button type="button" class="btn primary" id="commsWallExpand">ampliar para editar melhor</button>
+          <p class="comms-visual-wall-hint">fundo, balões e tema numa tela maior</p>
+        </div>
+        <label class="comms-visual-share">
+          <input type="checkbox" id="commsWallShare" />
+          <span>aplicar este visual pra todos no canal</span>
+        </label>
+
+        <button type="button" class="btn comms-visual-adm" id="commsVisualAdm">
+          Aplicar o visual do adm :D
+        </button>
+        <p class="comms-visual-adm-hint">fantasma · crepúsculo · fundo batman · pra todo o canal</p>
+
+        <p class="comms-visual-caption" id="commsVisualCaption">visual atual</p>
+        <div
+          class="comms-visual-preview"
+          id="commsVisualPreview"
+          data-comms-bubble-me="classic"
+          data-comms-bubble-them="classic"
+          data-comms-theme="paper"
+        >
+          <div class="comms-visual-preview-shell">
+            <div class="comms-visual-preview-top">
+              <strong>adri</strong> / <em>?</em> · CD-R
+            </div>
+            <div class="comms-visual-preview-feed" id="commsVisualPreviewFeed">
+              <div class="comms-wall" id="commsVisualWall" hidden aria-hidden="true"></div>
+              <div class="comms-msg them" id="commsPreviewMsgThem">
+                <span class="who"><span class="who-name">fulano</span></span>
+                <div class="comms-body">balão da outra pessoa</div>
+              </div>
+              <div class="comms-msg me" id="commsPreviewMsgMe">
+                <span class="who"><span class="who-name">você</span></span>
+                <div class="comms-body">teu balão fica assim</div>
+              </div>
+            </div>
+            <div class="comms-visual-preview-compose">mensagem…</div>
+            <div class="comms-visual-preview-actions">
+              <button type="button" class="btn" id="commsPreviewHighlightTest">testar destaque</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="deck-fs-tip-actions">
+        <button type="button" class="btn" id="commsVisualCancel">cancelar</button>
+        <button type="button" class="btn primary" id="commsVisualApply">aplicar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="deck-fs-tip lyrics-tip comms-wall-editor-tip" id="commsWallEditorTip" hidden>
+    <div class="deck-fs-tip-card comms-wall-editor-card" role="dialog" aria-labelledby="commsWallEditorTitle" aria-modal="true">
+      <p class="deck-fs-tip-kicker">COMMS · editor</p>
+      <h2 id="commsWallEditorTitle" class="deck-fs-tip-title">editar visual</h2>
+
+      <div class="comms-wall-editor-scroll">
+        <div class="comms-wall-editor-stage" id="commsWallEditorStage">
+          <div class="comms-wall on" id="commsWallEditorWall" aria-hidden="true">
+            <div class="comms-wall-pic" id="commsWallEditorPic"></div>
+          </div>
+          <div class="comms-wall-editor-frame" aria-hidden="true"></div>
+          <div class="comms-wall-editor-chrome-top" aria-hidden="true">
+            <strong>canal</strong>
+            <span>você / outra</span>
+          </div>
+          <div class="comms-wall-editor-empty" id="commsWallEditorEmpty">
+            <p>sem foto ainda</p>
+            <label class="btn comms-visual-wall-pick">
+              escolher foto
+              <input type="file" id="commsWallEditorFile" accept="image/*" hidden />
+            </label>
+          </div>
+          <div class="comms-wall-editor-bubbles comms-visual-preview" id="commsWallEditorBubbles" aria-hidden="true">
+            <div class="comms-msg them">
+              <div class="comms-body">olá</div>
+            </div>
+            <div class="comms-msg me">
+              <div class="comms-body">oi</div>
+            </div>
+          </div>
+          <div class="comms-wall-editor-chrome-bot" aria-hidden="true">
+            <span class="tip-ico"></span>
+            <span class="tip-field">msg…</span>
+            <span class="tip-tx">TX</span>
+          </div>
+        </div>
+
+        <div class="comms-wall-editor-tools" id="commsWallEditorTools" hidden>
+          <label class="comms-visual-wall-zoom">
+            <span>zoom</span>
+            <input type="range" id="commsWallEditorZoom" min="100" max="250" step="5" value="100" />
+          </label>
+          <button type="button" class="btn" id="commsWallEditorCenter">centralizar</button>
+        </div>
+
+        <p class="comms-visual-label">balão · você</p>
+        <div class="comms-visual-opts" id="commsEditorBubbleMeOpts" role="group" aria-label="seu balão">
+          <button type="button" class="comms-visual-opt" data-bubble-pack="base" data-bubble-me="classic">clássico</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="base" data-bubble-me="soft">suave</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="base" data-bubble-me="candy">doce</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="base" data-bubble-me="ghost">fantasma</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="rose" data-bubble-me="petal" hidden>pétala</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="rose" data-bubble-me="blush" hidden>blush</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="rose" data-bubble-me="bow" hidden>laço</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="rose" data-bubble-me="heart" hidden>coração</button>
+        </div>
+
+        <p class="comms-visual-label">balão · outra pessoa</p>
+        <div class="comms-visual-opts" id="commsEditorBubbleThemOpts" role="group" aria-label="balão da outra pessoa">
+          <button type="button" class="comms-visual-opt" data-bubble-pack="base" data-bubble-them="classic">clássico</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="base" data-bubble-them="soft">suave</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="base" data-bubble-them="candy">doce</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="base" data-bubble-them="ghost">fantasma</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="rose" data-bubble-them="petal" hidden>pétala</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="rose" data-bubble-them="blush" hidden>blush</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="rose" data-bubble-them="bow" hidden>laço</button>
+          <button type="button" class="comms-visual-opt" data-bubble-pack="rose" data-bubble-them="heart" hidden>coração</button>
+        </div>
+
+        <p class="comms-visual-label">tema da sala</p>
+        <div class="comms-visual-opts" id="commsEditorThemeOpts" role="group" aria-label="tema da sala">
+          <button type="button" class="comms-visual-opt" data-theme="paper">papel</button>
+          <button type="button" class="comms-visual-opt" data-theme="ocean">oceano</button>
+          <button type="button" class="comms-visual-opt" data-theme="rose">rosa</button>
+          <button type="button" class="comms-visual-opt" data-theme="dusk">crepúsculo</button>
+          <button type="button" class="comms-visual-opt" data-theme="night">noite</button>
+        </div>
+
+        <p class="comms-visual-label">destaque de menções</p>
+        <div class="comms-visual-opts" id="commsEditorHighlightOpts" role="group" aria-label="estilo de destaque de menções">
+          <button type="button" class="comms-visual-opt" data-highlight="pulse">pulso</button>
+          <button type="button" class="comms-visual-opt" data-highlight="glow">brilho</button>
+          <button type="button" class="comms-visual-opt" data-highlight="border">borda</button>
+          <button type="button" class="comms-visual-opt" data-highlight="shake">tremer</button>
+        </div>
+
+        <p class="comms-visual-label">cor do destaque · você</p>
+        <div class="comms-visual-opts" id="commsEditorHighlightColorMeOpts" role="group" aria-label="cor do destaque para suas mensagens">
+          <button type="button" class="comms-visual-opt" data-highlight-color-me="#fff">branco</button>
+          <button type="button" class="comms-visual-opt" data-highlight-color-me="#ffd700">dourado</button>
+          <button type="button" class="comms-visual-opt" data-highlight-color-me="#00ff00">verde</button>
+          <button type="button" class="comms-visual-opt" data-highlight-color-me="#ff6b6b">vermelho</button>
+          <button type="button" class="comms-visual-opt" data-highlight-color-me="#4ecdc4">ciano</button>
+        </div>
+
+        <p class="comms-visual-label">cor do destaque · outra pessoa</p>
+        <div class="comms-visual-opts" id="commsEditorHighlightColorThemOpts" role="group" aria-label="cor do destaque para mensagens de outros">
+          <button type="button" class="comms-visual-opt" data-highlight-color-them="#000">preto</button>
+          <button type="button" class="comms-visual-opt" data-highlight-color-them="#ffd700">dourado</button>
+          <button type="button" class="comms-visual-opt" data-highlight-color-them="#00ff00">verde</button>
+          <button type="button" class="comms-visual-opt" data-highlight-color-them="#ff6b6b">vermelho</button>
+          <button type="button" class="comms-visual-opt" data-highlight-color-them="#4ecdc4">ciano</button>
+        </div>
+      </div>
+
+      <div class="deck-fs-tip-actions">
+        <button type="button" class="btn primary" id="commsWallEditorDone">pronto</button>
+      </div>
+
+      <div class="comms-wall-howto" id="commsWallHowto" hidden>
+        <div class="comms-wall-howto-card">
+          <p class="comms-wall-howto-kicker">tutorial · fundo</p>
+          <div class="comms-wall-howto-steps">
+            <div class="comms-wall-howto-step on" data-wall-tip="0">
+              <div class="comms-wall-howto-demo tip-drag" aria-hidden="true">
+                <span class="tip-frame"></span>
+                <span class="tip-photo"></span>
+                <span class="tip-hand"></span>
+                <span class="tip-hand-ring"></span>
+              </div>
+              <strong>arrasta a foto</strong>
+              <p>segura e move pra cima, baixo, esquerda ou direita até encaixar</p>
+            </div>
+            <div class="comms-wall-howto-step" data-wall-tip="1">
+              <div class="comms-wall-howto-demo tip-zoom" aria-hidden="true">
+                <span class="tip-frame"></span>
+                <span class="tip-photo"></span>
+                <span class="tip-finger a"></span>
+                <span class="tip-finger b"></span>
+              </div>
+              <strong>dá zoom</strong>
+              <p>usa o slider ou pinça com 2 dedos pra aproximar / afastar</p>
+            </div>
+            <div class="comms-wall-howto-step" data-wall-tip="2">
+              <div class="comms-wall-howto-demo tip-theme" aria-hidden="true">
+                <span class="tip-chip">papel</span>
+                <span class="tip-chip on">crepúsculo</span>
+                <span class="tip-chip">noite</span>
+                <span class="tip-cursor"></span>
+              </div>
+              <strong>tema e balões</strong>
+              <p>rola pra baixo e escolhe o visual da sala e dos balões de fala</p>
+            </div>
+          </div>
+          <div class="comms-wall-howto-dots" id="commsWallHowtoDots" aria-hidden="true">
+            <i class="on"></i><i></i><i></i>
+          </div>
+          <div class="comms-wall-howto-actions">
+            <button type="button" class="btn" id="commsWallHowtoSkip">pular</button>
+            <button type="button" class="btn primary" id="commsWallHowtoNext">próximo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="deck-app-boot" id="deckAppBoot" hidden aria-hidden="true">
+    <div class="deck-app-boot-scan" aria-hidden="true"></div>
+    <div class="deck-app-boot-glow" aria-hidden="true"></div>
+    <div class="deck-app-boot-inner">
+      <img class="deck-app-boot-icon" src="assets/favicon.jpg?v=2" alt="" />
+      <p class="deck-app-boot-brand">Panchiko</p>
+      <p class="deck-app-boot-title">D&gt;E&gt;A&gt;T&gt;H&gt;D&gt;E&gt;C&gt;K</p>
+      <code class="deck-app-boot-line" id="deckAppBootLine">BOOT · APP</code>
+    </div>
+    <button type="button" class="deck-app-boot-skip" id="deckAppBootSkip" hidden>pular</button>
+  </div>
+
+  <div class="deck-assemble-lock" id="deckAssembleLock" hidden aria-hidden="true"></div>
+  <div class="deck-assemble-hud" id="deckAssembleHud" hidden aria-live="polite">
+    <div class="deck-assemble-hud-inner">
+      <span class="deck-assemble-led" aria-hidden="true"></span>
+      <code id="deckAssembleLine">BOOT · …</code>
+    </div>
+  </div>
+
+  <div class="comms-lightbox" id="commsLightbox" hidden>
+    <div class="comms-lightbox-top">
+      <span class="comms-lightbox-by" id="commsLightboxBy" hidden></span>
+      <div class="comms-lightbox-top-actions">
+        <button type="button" class="comms-lightbox-dl" id="commsLightboxDl" title="baixar mídia" aria-label="baixar mídia">
+          <svg class="comms-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 4v10m0 0l3.5-3.5M12 14L8.5 10.5M6 19h12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button type="button" class="comms-lightbox-close" id="commsLightboxClose" aria-label="fechar">×</button>
+      </div>
+    </div>
+    <button type="button" class="comms-lightbox-nav prev" id="commsLightboxPrev" aria-label="anterior">‹</button>
+    <div class="comms-lightbox-stage" id="commsLightboxStage">
+      <div class="comms-lightbox-track" id="commsLightboxTrack">
+        <div class="comms-lightbox-slide" data-slot="prev">
+          <img id="commsLightboxImgPrev" alt="" draggable="false" />
+        </div>
+        <div class="comms-lightbox-slide" data-slot="curr">
+          <img id="commsLightboxImg" alt="imagem ampliada" draggable="false" />
+        </div>
+        <div class="comms-lightbox-slide" data-slot="next">
+          <img id="commsLightboxImgNext" alt="" draggable="false" />
+        </div>
+      </div>
+    </div>
+    <button type="button" class="comms-lightbox-nav next" id="commsLightboxNext" aria-label="próxima">›</button>
+    <div class="comms-lightbox-footer">
+      <div class="comms-lightbox-dots" id="commsLightboxDots" hidden></div>
+      <span class="comms-lightbox-count" id="commsLightboxCount" hidden></span>
+    </div>
+    <div class="comms-lightbox-tip" id="commsLightboxTip" hidden>
+      <div class="comms-lightbox-tip-card">
+        <strong id="commsLightboxTipTitle">como ampliar</strong>
+        <div class="tip-stage" aria-hidden="true">
+          <!-- step: pinch -->
+          <div class="tip-demo tip-pinch on" data-tip-step="0">
+            <div class="tip-photo"></div>
+            <span class="tip-finger a"></span>
+            <span class="tip-finger b"></span>
+            <span class="tip-ripple"></span>
+          </div>
+          <!-- step: double tap -->
+          <div class="tip-demo tip-tap" data-tip-step="1">
+            <div class="tip-photo"></div>
+            <span class="tip-finger tap"></span>
+            <span class="tip-burst"></span>
+          </div>
+          <!-- step: swipe carousel -->
+          <div class="tip-demo tip-swipe" data-tip-step="2">
+            <div class="tip-strip">
+              <div class="tip-photo"></div>
+              <div class="tip-photo alt"></div>
+              <div class="tip-photo"></div>
+            </div>
+            <span class="tip-finger swipe"></span>
+          </div>
+        </div>
+        <p class="tip-caption" id="commsLightboxTipCap">pinça com 2 dedos pra dar zoom</p>
+        <div class="tip-steps" id="commsLightboxTipSteps" aria-hidden="true">
+          <i class="on"></i><i></i><i></i>
+        </div>
+        <button type="button" class="btn primary" id="commsLightboxTipOk">entendi</button>
+      </div>
+    </div>
+  </div>
+  <div class="deck-fs-tip lyrics-tip" id="commsCallTip" hidden>
+    <div class="deck-fs-tip-card" role="dialog" aria-labelledby="commsCallTipTitle" aria-modal="true">
+      <p class="deck-fs-tip-kicker">COMMS · ligação de voz</p>
+      <h2 id="commsCallTipTitle" class="deck-fs-tip-title">antes de ligar</h2>
+      <p class="deck-fs-tip-body">
+        A call usa o microfone do aparelho e áudio peer-to-peer (WebRTC).
+        Quem estiver no canal pode entrar. O áudio não passa pelo servidor —
+        só o sinal pra conectar.
+      </p>
+      <ul class="deck-fs-tip-list">
+        <li>pede permissão de microfone no navegador</li>
+        <li>em Wi‑Fi restrito / 4G a call pode falhar (NAT)</li>
+        <li>não grave nem divulgue conversa sem consentimento</li>
+        <li>quem criou a call pode remover alguém</li>
+      </ul>
+      <div class="deck-fs-tip-actions">
+        <button type="button" class="btn" id="commsCallTipCancel">agora não</button>
+        <button type="button" class="btn primary" id="commsCallTipOk">entendi, ligar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="comms-react-pop" id="commsReactPop" hidden role="menu">
+    <button type="button" data-react="😈" aria-label="diabinho">😈</button>
+    <button type="button" data-react="😛" aria-label="lingua">😛</button>
+    <button type="button" data-react="😝" aria-label="lingua olhos">😝</button>
+    <button type="button" data-react="🔥" aria-label="fogo">🔥</button>
+    <button type="button" data-react="👍" aria-label="joinha">👍</button>
+    <button type="button" class="comms-react-action" data-copy="1" aria-label="copiar mensagem">
+      copiar
+    </button>
+    <button type="button" data-reply="1" aria-label="responder">↩</button>
+  </div>
+
+  <div class="comms-sticker-maker" id="commsStickerMaker" hidden>
+    <div class="comms-sticker-maker-card" role="dialog" aria-labelledby="commsStickerMakerTitle">
+      <header>
+        <strong id="commsStickerMakerTitle">nova figurinha</strong>
+        <button type="button" class="btn" id="commsStickerMakerClose" aria-label="fechar">×</button>
+      </header>
+      <p class="comms-sticker-maker-hint">imagem, gif ou vídeo ≤5s · gif/vídeo viram webp animado</p>
+      <label class="comms-sticker-maker-pick btn">
+        escolher arquivo
+        <input type="file" id="commsStickerMakerFile" accept="image/*,video/mp4,video/webm,video/quicktime,.gif" hidden />
+      </label>
+      <div class="comms-sticker-maker-preview" id="commsStickerMakerPreview" hidden></div>
+      <label class="comms-sticker-maker-field">
+        <span>descrição leve</span>
+        <input id="commsStickerMakerDesc" type="text" maxlength="80" placeholder="ex: monki caótico" autocomplete="off" />
+      </label>
+      <p class="comms-sticker-maker-sign">assinatura · <strong id="commsStickerMakerSign">—</strong></p>
+      <div class="comms-sticker-maker-actions">
+        <button type="button" class="btn" id="commsStickerMakerCancel">cancelar</button>
+        <button type="button" class="btn primary" id="commsStickerMakerSave" disabled>criar e enviar</button>
+      </div>
+      <div class="comms-sticker-maker-progress" id="commsStickerMakerProgress" hidden>
+        <div class="comms-sticker-forge" aria-hidden="true">
+          <span class="forge-ring"></span>
+          <span class="forge-core"></span>
+          <span class="forge-spark a"></span>
+          <span class="forge-spark b"></span>
+          <span class="forge-spark c"></span>
+        </div>
+        <div class="comms-sticker-maker-bar"><i id="commsStickerMakerBar"></i></div>
+        <p id="commsStickerMakerProgressLabel">criando figurinha…</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="comms-sticker-info" id="commsStickerInfo" hidden>
+    <div class="comms-sticker-info-card">
+      <div class="comms-sticker-info-preview" id="commsStickerInfoPreview"></div>
+      <p class="comms-sticker-info-by">por <strong id="commsStickerInfoCreator">—</strong></p>
+      <p class="comms-sticker-info-desc" id="commsStickerInfoDesc"></p>
+      <button type="button" class="btn primary" id="commsStickerInfoOk">ok</button>
+    </div>
+  </div>
+
+  <div class="deck-fs-tip lyrics-tip" id="deckInstallTip" hidden>
+    <div class="deck-fs-tip-card" role="dialog" aria-labelledby="deckInstallTipTitle" aria-modal="true">
+      <p class="deck-fs-tip-kicker">DEATHDECK · app</p>
+      <h2 id="deckInstallTipTitle" class="deck-fs-tip-title">instala no celular</h2>
+      <p class="deck-fs-tip-body" id="deckInstallTipBody">
+        Abre mais rápido, tela cheia e fica na home como app.
+      </p>
+      <ul class="deck-fs-tip-list" id="deckInstallTipList" hidden></ul>
+      <div class="deck-fs-tip-actions">
+        <button type="button" class="btn" id="deckInstallTipLater">agora não</button>
+        <button type="button" class="btn primary" id="deckInstallTipOk">instalar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="deck-fs-tip lyrics-tip" id="commsAvatarEditorTip" hidden>
+    <div class="deck-fs-tip-card comms-avatar-editor-card" role="dialog" aria-modal="true" aria-labelledby="commsAvatarEditorTitle">
+      <p class="deck-fs-tip-kicker">COMMS · foto</p>
+      <h2 id="commsAvatarEditorTitle" class="deck-fs-tip-title">editar foto de perfil</h2>
+      <p class="comms-avatar-editor-lead">arrasta pra enquadrar · zoom e filtro antes de aplicar</p>
+
+      <div class="comms-avatar-editor-stage" id="commsAvatarEditorStage">
+        <div class="comms-avatar-editor-viewport" id="commsAvatarEditorViewport">
+          <img id="commsAvatarEditorImg" alt="" draggable="false" />
+          <div class="comms-avatar-editor-mask" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <label class="comms-avatar-editor-zoom" for="commsAvatarEditorZoom">
+        <span>zoom</span>
+        <input type="range" id="commsAvatarEditorZoom" min="100" max="280" step="1" value="100" />
+      </label>
+
+      <p class="comms-avatar-editor-label">filtro</p>
+      <div class="comms-avatar-editor-filters" id="commsAvatarEditorFilters" role="group" aria-label="filtro da foto">
+        <button type="button" class="comms-avatar-filter on" data-avatar-filter="none">original</button>
+        <button type="button" class="comms-avatar-filter" data-avatar-filter="mono">mono</button>
+        <button type="button" class="comms-avatar-filter" data-avatar-filter="warm">quente</button>
+        <button type="button" class="comms-avatar-filter" data-avatar-filter="cool">frio</button>
+        <button type="button" class="comms-avatar-filter" data-avatar-filter="punch">punch</button>
+        <button type="button" class="comms-avatar-filter" data-avatar-filter="fade">fade</button>
+        <button type="button" class="comms-avatar-filter" data-avatar-filter="noir">noir</button>
+        <button type="button" class="comms-avatar-filter" data-avatar-filter="vhs">vhs</button>
+      </div>
+
+      <div class="deck-fs-tip-actions">
+        <button type="button" class="btn" id="commsAvatarEditorCancel">cancelar</button>
+        <button type="button" class="btn" id="commsAvatarEditorReset">resetar</button>
+        <button type="button" class="btn primary" id="commsAvatarEditorApply">aplicar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="comms-face-pop" id="commsFacePop" hidden>
+    <button type="button" class="comms-face-pop-scrim" id="commsFacePopClose" aria-label="fechar"></button>
+    <div class="comms-face-pop-card" role="dialog" aria-modal="true" aria-labelledby="commsFacePopName">
+      <div class="comms-face-pop-stage" id="commsFacePopStage">
+        <div class="comms-face-pop-pic" id="commsFacePopPic" aria-hidden="true"></div>
+        <div class="comms-face-pop-fx" id="commsFacePopFx" aria-hidden="true"></div>
+        <div class="comms-face-pop-banner" id="commsFacePopBanner" hidden aria-hidden="true">SUPER MANEIRA :P</div>
+      </div>
+      <p class="comms-face-pop-name" id="commsFacePopName">ghost</p>
+      <p class="comms-face-pop-hint" id="commsFacePopHint">Curte se achar maneira</p>
+      <div class="comms-face-pop-actions">
+        <button type="button" class="btn" id="commsFacePopDismiss">fechar</button>
+        <button type="button" class="btn primary" id="commsFacePopLike">Curte se achar maneira</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="vendor/qrcode.min.js"></script>
+  <script src="lyrics-ui.js?v=live31"></script>
+  <script src="toys.js?v=live17"></script>
+  <script src="app.js?v=live168"></script>
+</body>
+</html>

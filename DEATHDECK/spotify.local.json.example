@@ -1,0 +1,5 @@
+{
+  "client_id": "COLE_AQUI",
+  "client_secret": "COLE_AQUI",
+  "redirect_uri": "http://127.0.0.1:9756/api/deck/spotify/callback"
+}

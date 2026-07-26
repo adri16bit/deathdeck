@@ -1,0 +1,11 @@
+node_modules/
+.env
+.env.*
+!.env.example
+gemini.local.json
+DEATHDECK/spotify.local.json
+DEATHDECK/comms-rooms.json
+public/DEATHDECK/avatars/*
+!public/DEATHDECK/avatars/.gitkeep
+runtime-port.txt
+*.log
