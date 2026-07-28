@@ -4728,32 +4728,70 @@
       } else if (state.peerId) {
         avatarCache.delete(state.peerId);
       }
-      refreshAvatarLobbyUi();
+      refreshAvatarUi();
       refreshFeedFaces();
       if (typeof VoiceCall !== 'undefined' && VoiceCall?.refreshPeople) {
         VoiceCall.refreshPeople();
       }
     }
 
-    function refreshAvatarLobbyUi() {
-      const preview = $('commsAvatarPreview');
-      const fallback = $('commsAvatarFallback');
-      const puck = $('commsAvatarBtn');
-      const clearBtn = $('commsAvatarClear');
-      const name = ($('commsName')?.value || '').trim();
+    function refreshAvatarUi() {
+      const name = ($('commsName')?.value || state.name || '').trim();
       const initial = (name.charAt(0) || '?').toUpperCase();
-      if (fallback) fallback.textContent = initial;
-      if (preview) {
-        if (localAvatar) {
-          preview.src = localAvatar;
-          preview.hidden = false;
-        } else {
-          preview.removeAttribute('src');
-          preview.hidden = true;
+      [
+        ['commsAvatarPreview', 'commsAvatarFallback', 'commsAvatarBtn', 'commsAvatarClear'],
+        ['commsRoomAvatarPreview', 'commsRoomAvatarFallback', 'commsRoomAvatarBtn', 'commsRoomAvatarClear'],
+      ].forEach(([previewId, fallbackId, puckId, clearId]) => {
+        const preview = $(previewId);
+        const fallback = $(fallbackId);
+        const puck = $(puckId);
+        const clearBtn = $(clearId);
+        if (fallback) fallback.textContent = initial;
+        if (preview) {
+          if (localAvatar) {
+            preview.src = localAvatar;
+            preview.hidden = false;
+          } else {
+            preview.removeAttribute('src');
+            preview.hidden = true;
+          }
         }
+        if (puck) puck.classList.toggle('has-photo', !!localAvatar);
+        if (clearBtn) clearBtn.hidden = !localAvatar;
+      });
+    }
+
+    function syncRoomProfileUi() {
+      const roomName = $('commsRoomName');
+      if (roomName && state.name) roomName.value = state.name;
+      if ($('commsName') && state.name) $('commsName').value = state.name;
+      refreshAvatarUi();
+    }
+
+    async function applyRoomNick(force = false) {
+      if (!state.code || !state.peerId) return;
+      const input = $('commsRoomName');
+      if (!input) return;
+      const n = input.value.trim().slice(0, 24);
+      if (!n) {
+        input.value = state.name || '';
+        notify('nick nao pode ficar vazio');
+        return;
       }
-      if (puck) puck.classList.toggle('has-photo', !!localAvatar);
-      if (clearBtn) clearBtn.hidden = !localAvatar;
+      if (n === state.name && !force) return;
+      state.name = n;
+      if ($('commsName')) $('commsName').value = n;
+      save();
+      const r = await postPresence({ name: n });
+      if (r?.ok) {
+        notify('nick atualizado');
+        if (r.peers) renderPeers(r.peers, r.slots);
+        refreshAvatarUi();
+        refreshFeedFaces();
+        if (typeof VoiceCall !== 'undefined' && VoiceCall?.refreshPeople) VoiceCall.refreshPeople();
+      } else {
+        notify(r?.error || 'falha ao salvar nick');
+      }
     }
 
     const AVATAR_FILTERS = {
@@ -4909,39 +4947,60 @@
     function exportAvatarEditor() {
       const { viewport } = avatarEditorEls();
       if (!avatarEditor.img || !viewport) throw new Error('sem foto');
-      const size = 160;
-      const canvas = document.createElement('canvas');
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('canvas');
       const vw = viewport.clientWidth || 1;
       const vh = viewport.clientHeight || 1;
       const cover = Math.max(vw / avatarEditor.baseW, vh / avatarEditor.baseH);
-      const scale = cover * avatarEditor.zoom * (size / vw);
-      const drawnW = avatarEditor.baseW * scale;
-      const drawnH = avatarEditor.baseH * scale;
-      const dx = size / 2 + (avatarEditor.x * size) / vw - drawnW / 2;
-      const dy = size / 2 + (avatarEditor.y * size) / vh - drawnH / 2;
       const f = AVATAR_FILTERS[avatarEditor.filter] || AVATAR_FILTERS.none;
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
-      ctx.closePath();
-      ctx.clip();
-      ctx.filter = f.canvas;
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(avatarEditor.img, dx, dy, drawnW, drawnH);
-      ctx.restore();
-      let quality = 0.78;
-      let data = canvas.toDataURL('image/jpeg', quality);
-      while (data.length > 90000 && quality > 0.4) {
-        quality -= 0.08;
-        data = canvas.toDataURL('image/jpeg', quality);
+      const maxChars = 115000;
+
+      const drawAt = (size) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('canvas');
+        const scale = cover * avatarEditor.zoom * (size / vw);
+        const drawnW = avatarEditor.baseW * scale;
+        const drawnH = avatarEditor.baseH * scale;
+        const dx = size / 2 + (avatarEditor.x * size) / vw - drawnW / 2;
+        const dy = size / 2 + (avatarEditor.y * size) / vh - drawnH / 2;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+        ctx.filter = f.canvas;
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(avatarEditor.img, dx, dy, drawnW, drawnH);
+        ctx.restore();
+        return canvas;
+      };
+
+      const encode = (canvas) => {
+        let useWebp = false;
+        try {
+          useWebp = canvas.toDataURL('image/webp', 0.8).startsWith('data:image/webp');
+        } catch {
+          useWebp = false;
+        }
+        const mime = useWebp ? 'image/webp' : 'image/jpeg';
+        let quality = useWebp ? 0.86 : 0.9;
+        const minQ = useWebp ? 0.72 : 0.74;
+        let data = canvas.toDataURL(mime, quality);
+        while (data.length > maxChars && quality > minQ) {
+          quality -= 0.04;
+          data = canvas.toDataURL(mime, quality);
+        }
+        return data;
+      };
+
+      /* 160px + JPEG agressivo deixava tudo borrado no popup/retina */
+      for (const size of [512, 384, 256]) {
+        const data = encode(drawAt(size));
+        if (data.length <= maxChars) return data;
       }
-      if (data.length > 110000) throw new Error('foto ainda grande · tenta outra');
-      return data;
+      throw new Error('foto ainda grande · tenta outra');
     }
 
     function applyAvatarEditor() {
@@ -4952,7 +5011,11 @@
         persistLocalAvatar(data);
         notify('foto de perfil ok');
         if (state.code && state.peerId) {
-          postPresence({ avatar: localAvatar || null }).catch(() => {});
+          postPresence({ avatar: localAvatar || null })
+            .then((r) => {
+              if (r?.ok && r.peers) renderPeers(r.peers, r.slots);
+            })
+            .catch(() => {});
         }
         done?.(data);
       } catch (err) {
@@ -5036,7 +5099,11 @@
     function clearLocalAvatar() {
       persistLocalAvatar('');
       if (state.code && state.peerId) {
-        postPresence({ avatar: null }).catch(() => {});
+        postPresence({ avatar: null })
+          .then((r) => {
+            if (r?.ok && r.peers) renderPeers(r.peers, r.slots);
+          })
+          .catch(() => {});
       }
     }
 
@@ -5532,6 +5599,103 @@
       );
     }
 
+    let pendingInvite = null;
+
+    function setInviteAvatar(name, src) {
+      const wrap = $('commsInviteAvatar');
+      const img = $('commsInviteAvatarImg');
+      const fallback = $('commsInviteAvatarFallback');
+      const initial = (String(name || '?').trim().charAt(0) || '?').toUpperCase();
+      if (wrap) wrap.style.setProperty('--face-hue', faceHue(name));
+      if (fallback) fallback.textContent = initial;
+      if (!wrap || !img) return;
+      if (src) {
+        img.src = src;
+        img.hidden = false;
+        wrap.classList.add('has-photo');
+      } else {
+        img.removeAttribute('src');
+        img.hidden = true;
+        wrap.classList.remove('has-photo');
+      }
+    }
+
+    async function loadInviteAvatar(invite) {
+      if (!invite) return;
+      setInviteAvatar(invite.from, '');
+      let peerId = String(invite.fromId || '').trim();
+      if (invite.code) {
+        try {
+          const room = await api(`/api/deck/comms/${encodeURIComponent(invite.code)}`);
+          if (pendingInvite !== invite) return;
+          if (room.ok && room.peers) {
+            const match =
+              room.peers.find((p) => p.id && peerId && p.id === peerId) ||
+              room.peers.find(
+                (p) =>
+                  String(p.name || '')
+                    .trim()
+                    .toLowerCase() === String(invite.from || '').trim().toLowerCase()
+              );
+            if (match) {
+              peerId = match.id || peerId;
+              if (match.avatarUrl) {
+                setInviteAvatar(invite.from, match.avatarUrl);
+                return;
+              }
+            }
+          }
+        } catch {
+          /* ignore */
+        }
+      }
+      if (!peerId || !invite.code) return;
+      try {
+        const r = await api(
+          `/api/deck/comms/${encodeURIComponent(invite.code)}/avatar/${encodeURIComponent(peerId)}`
+        );
+        if (pendingInvite !== invite) return;
+        if (r.ok) {
+          const src = r.avatarUrl || r.avatar || '';
+          if (src) setInviteAvatar(invite.from, src);
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
+    function refreshInviteUi() {
+      const banner = $('commsInviteBanner');
+      if (!banner) return;
+      if (!pendingInvite || state.code) {
+        banner.hidden = true;
+        return;
+      }
+      banner.hidden = false;
+      const text = $('commsInviteText');
+      if (text) {
+        text.innerHTML = `<strong>${escapeHtml(pendingInvite.from)}</strong> te mandou um link de um canal — entrar?`;
+      }
+      if ($('commsJoinCode') && pendingInvite.code) {
+        $('commsJoinCode').value = pendingInvite.code;
+      }
+      loadInviteAvatar(pendingInvite);
+    }
+
+    function showInviteFromLink(from, code, fromId) {
+      pendingInvite = {
+        from: String(from || '').trim().slice(0, 24),
+        code,
+        fromId: String(fromId || '').trim().slice(0, 32),
+      };
+      refreshInviteUi();
+    }
+
+    function dismissInvite() {
+      pendingInvite = null;
+      refreshInviteUi();
+    }
+
     function refreshResumeUi() {
       const row = $('commsResumeRow');
       const btn = $('commsResume');
@@ -5566,6 +5730,7 @@
       if (lyrics) lyrics.hidden = true;
       setLocked(false);
       refreshResumeUi();
+      refreshInviteUi();
     }
 
     function showRoom() {
@@ -5821,9 +5986,23 @@
       }
     }
 
-    function joinUrl(code) {
+    function joinUrl(code, fromName, fromId) {
       const u = new URL(location.href);
       u.searchParams.set('comms', code);
+      const nick = String(fromName || state.name || callsign() || '')
+        .trim()
+        .slice(0, 24);
+      const pid = String(fromId || state.peerId || '')
+        .trim()
+        .slice(0, 32);
+      if (nick) {
+        u.searchParams.set('from', nick);
+        if (pid) u.searchParams.set('fromId', pid);
+        else u.searchParams.delete('fromId');
+      } else {
+        u.searchParams.delete('from');
+        u.searchParams.delete('fromId');
+      }
       return u.toString();
     }
 
@@ -8315,6 +8494,7 @@
         $('commsJoinCode').value = code;
       }
       refreshResumeUi();
+      refreshInviteUi();
     }
 
     async function setTyping(on) {
@@ -8429,6 +8609,7 @@
       state.code = payload.code;
       state.peerId = payload.peerId;
       state.name = payload.name;
+      pendingInvite = null;
       state.seat = payload.seat;
       state.cdr = !!payload.cdr;
       state.cdrTyping = !!payload.cdrTyping;
@@ -8453,6 +8634,7 @@
       setTypingUi([]);
       save();
       showRoom();
+      syncRoomProfileUi();
       applyVisualToRoom(visualApplied);
       syncPeerAvatars(payload.peers || []);
       if (payload.visual) syncRoomVisual(payload.visual);
@@ -9902,17 +10084,29 @@
       if (saved.peerId) state.peerId = saved.peerId;
       localAvatar = loadLocalAvatar();
       avatarDirty = !!localAvatar;
-      refreshAvatarLobbyUi();
+      refreshAvatarUi();
       loadStickers();
 
       $('commsCreate').addEventListener('click', create);
       $('commsJoin').addEventListener('click', join);
       $('commsLeave').addEventListener('click', leave);
-      $('commsName')?.addEventListener('input', refreshAvatarLobbyUi);
+      $('commsName')?.addEventListener('input', refreshAvatarUi);
       const openAvatarPicker = () => $('commsAvatarFile')?.click();
       $('commsAvatarBtn')?.addEventListener('click', openAvatarPicker);
       $('commsAvatarPick')?.addEventListener('click', openAvatarPicker);
       $('commsAvatarClear')?.addEventListener('click', () => clearLocalAvatar());
+      $('commsRoomAvatarBtn')?.addEventListener('click', openAvatarPicker);
+      $('commsRoomAvatarPick')?.addEventListener('click', openAvatarPicker);
+      $('commsRoomAvatarClear')?.addEventListener('click', () => clearLocalAvatar());
+      $('commsRoomName')?.addEventListener('input', refreshAvatarUi);
+      $('commsRoomName')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          applyRoomNick(true);
+        }
+      });
+      $('commsRoomName')?.addEventListener('blur', () => applyRoomNick());
+      $('commsRoomNickApply')?.addEventListener('click', () => applyRoomNick(true));
       $('commsAvatarFile')?.addEventListener('change', async (e) => {
         const file = e.target.files?.[0];
         e.target.value = '';
@@ -9972,13 +10166,13 @@
       });
       $('commsCopyUrl')?.addEventListener('click', async () => {
         if (!state.code) return;
-        const url = joinUrl(state.code);
+        const url = joinUrl(state.code, state.name);
         const ok = await copyText(url, 'link do canal copiado');
         if (!ok && $('commsPeers')) notify(url);
       });
       $('commsQrCopyUrl')?.addEventListener('click', async () => {
         if (!state.code) return;
-        const url = joinUrl(state.code);
+        const url = joinUrl(state.code, state.name);
         const ok = await copyText(url, 'link do canal copiado');
         const hint = $('commsQrHint');
         if (hint) hint.textContent = ok ? 'URL copiada' : url;
@@ -10843,15 +11037,25 @@
           join();
         }
       });
+      $('commsInviteJoin')?.addEventListener('click', () => join());
+      $('commsInviteDismiss')?.addEventListener('click', dismissInvite);
 
-      // deep link ?comms=CODE — não bloqueia reconnect dos membros
+      // deep link ?comms=CODE&from=NICK&fromId=PEER — não bloqueia reconnect dos membros
       const params = new URLSearchParams(location.search);
       const deep = String(params.get('comms') || '')
         .trim()
         .toUpperCase()
         .replace(/[^A-Z0-9]/g, '')
         .slice(0, 8);
+      const fromNick = String(params.get('from') || '').trim().slice(0, 24);
+      const fromId = String(params.get('fromId') || '')
+        .trim()
+        .replace(/[^a-f0-9]/gi, '')
+        .slice(0, 32);
       if (deep) $('commsJoinCode').value = deep;
+      if (deep && fromNick && !(saved.code && saved.peerId)) {
+        showInviteFromLink(fromNick, deep, fromId);
+      }
 
       if (saved.code && saved.peerId) {
         // refresh / fechar aba sem "sair": criador e membros voltam pro canal

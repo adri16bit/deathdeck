@@ -993,6 +993,19 @@ the hiss is part of the record now.
           <div id="commsLobby" class="comms-lobby">
             <p class="eyebrow">panchikord energy · até 10 no canal</p>
             <p class="lede">Canal pra quem estiver na caçada — tipo Discord mínimo, até 10 pessoas.</p>
+            <div id="commsInviteBanner" class="comms-invite-banner" hidden>
+              <div class="comms-invite-avatar" id="commsInviteAvatar" aria-hidden="true">
+                <img id="commsInviteAvatarImg" alt="" hidden />
+                <span class="comms-invite-avatar-fallback" id="commsInviteAvatarFallback">?</span>
+              </div>
+              <div class="comms-invite-body">
+                <p class="comms-invite-text" id="commsInviteText"></p>
+                <div class="comms-invite-actions">
+                  <button type="button" class="btn call-accept" id="commsInviteJoin">entrar</button>
+                  <button type="button" class="btn call-decline" id="commsInviteDismiss">agora não</button>
+                </div>
+              </div>
+            </div>
             <div class="comms-profile" id="commsProfile">
               <button type="button" class="comms-profile-puck" id="commsAvatarBtn" title="foto de perfil" aria-label="escolher foto de perfil">
                 <img id="commsAvatarPreview" alt="" hidden />
@@ -1098,6 +1111,22 @@ the hiss is part of the record now.
               <div class="lyrics-body" id="commsLyricsBody"></div>
             </div>
             <div class="comms-more-panel" id="commsMorePanel" hidden>
+              <div class="comms-more-profile" id="commsRoomProfile">
+                <button type="button" class="comms-profile-puck comms-room-profile-puck" id="commsRoomAvatarBtn" title="foto de perfil" aria-label="escolher foto de perfil">
+                  <img id="commsRoomAvatarPreview" alt="" hidden />
+                  <span class="comms-profile-fallback" id="commsRoomAvatarFallback">?</span>
+                </button>
+                <div class="comms-room-profile-meta">
+                  <label class="comms-lab" for="commsRoomName">nick
+                    <input id="commsRoomName" maxlength="24" placeholder="ex: adri16bit" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other" />
+                  </label>
+                  <div class="comms-room-profile-actions">
+                    <button type="button" class="btn" id="commsRoomAvatarPick">foto</button>
+                    <button type="button" class="btn" id="commsRoomAvatarClear" hidden>remover</button>
+                    <button type="button" class="btn primary" id="commsRoomNickApply">salvar nick</button>
+                  </div>
+                </div>
+              </div>
               <p class="comms-more-code">canal <strong id="commsCodeLabel">———</strong></p>
               <button type="button" class="btn" id="commsQrBtn">QR</button>
               <button type="button" class="btn" id="commsCopy" title="copiar código">código</button>

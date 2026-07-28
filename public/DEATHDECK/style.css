@@ -1030,6 +1030,76 @@ button.chip:hover {
   min-height: 4rem;
 }
 
+.comms-invite-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.85rem;
+  background: #16131c;
+  color: #f2eef8;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+}
+.comms-invite-banner[hidden] { display: none !important; }
+.comms-invite-avatar {
+  flex: 0 0 auto;
+  position: relative;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  background: hsl(var(--face-hue, 200) 42% 62%);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+.comms-invite-avatar.has-photo {
+  background: #fffdf8;
+}
+.comms-invite-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.comms-invite-avatar.has-photo .comms-invite-avatar-fallback {
+  display: none;
+}
+.comms-invite-avatar-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: rgba(17, 17, 17, 0.82);
+  text-transform: uppercase;
+}
+.comms-invite-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.comms-invite-text {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+.comms-invite-text strong {
+  color: #fff;
+  font-weight: 700;
+}
+.comms-invite-actions {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+.comms-invite-actions .btn {
+  flex: 1 1 0;
+  padding: 0.32rem 0.4rem;
+  font-size: 0.68rem;
+  border-radius: 999px;
+}
+
 .comms-lobby,
 .comms-room {
   position: relative;
@@ -1625,6 +1695,42 @@ body.comms-locked #commsLyrics {
   gap: 0.35rem;
   margin: -0.15rem 0 0.15rem;
   align-items: center;
+}
+.comms-more-profile {
+  flex: 1 1 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.15rem 0 0.45rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  margin-bottom: 0.1rem;
+}
+.comms-room-profile-puck {
+  width: 2.75rem;
+  height: 2.75rem;
+  cursor: pointer;
+}
+.comms-room-profile-meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.comms-room-profile-meta .comms-lab {
+  margin: 0;
+}
+.comms-room-profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.comms-room-profile-actions .btn {
+  padding: 0.28rem 0.45rem;
+  font-size: 0.68rem;
+}
+.comms-room-profile-actions .btn.primary {
+  margin-left: auto;
 }
 .comms-more-panel #commsSpotifyBtn.on {
   background: #1db954;
