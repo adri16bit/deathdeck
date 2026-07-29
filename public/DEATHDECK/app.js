@@ -39,7 +39,23 @@
   }
 
   let toastTimer = null;
+  function callUiBlocksToast() {
+    const bubble = $('commsCallBubble');
+    const tip = $('commsCallTip');
+    if (bubble && !bubble.hidden) return true;
+    if (tip && !tip.hidden) return true;
+    return false;
+  }
+  function dismissToast() {
+    const el = $('deckToast');
+    if (!el) return;
+    clearTimeout(toastTimer);
+    toastTimer = null;
+    el.classList.remove('on');
+    el.hidden = true;
+  }
   function notify(msg, ms = 2800) {
+    if (callUiBlocksToast()) return;
     const el = $('deckToast');
     if (!el) return;
     el.hidden = false;
@@ -3336,23 +3352,26 @@
         const btn = $('commsSpotifyBtn');
         if (!btn) return;
         btn.hidden = false;
+        btn.removeAttribute('title');
         if (spotCfgOk === false) {
-          btn.innerHTML = spotifyBtnMarkup('Spotify · setup');
+          btn.innerHTML = spotifyBtnMarkup('Spotify');
           btn.classList.remove('on');
-          btn.title = 'falta configurar spotify.local.json no server';
+          btn.setAttribute('aria-label', 'Spotify');
           return;
         }
         const on = spotConnected();
         if (on && spotProduct && spotProduct !== 'premium') {
-          btn.innerHTML = spotifyBtnMarkup('Spotify · free');
+          btn.innerHTML = spotifyBtnMarkup('Spotify');
           btn.classList.toggle('on', true);
-          btn.title = 'conta Free — no canal o play cai no YouTube. Premium libera o player Spotify.';
+          btn.setAttribute('aria-label', 'Spotify');
+        } else if (on) {
+          btn.innerHTML = spotifyBtnMarkup('Spotify');
+          btn.classList.toggle('on', true);
+          btn.setAttribute('aria-label', 'Spotify');
         } else {
-          btn.innerHTML = spotifyBtnMarkup(on ? 'Spotify · ok' : 'conectar Spotify');
-          btn.classList.toggle('on', on);
-          btn.title = on
-            ? 'Spotify conectado (Premium). Clique pra desconectar.'
-            : 'conectar Spotify Premium pra tocar no canal';
+          btn.innerHTML = spotifyBtnMarkup('conectar');
+          btn.classList.toggle('on', false);
+          btn.setAttribute('aria-label', 'conectar Spotify');
         }
       }
 
@@ -4747,7 +4766,12 @@
     }
 
     function refreshAvatarUi() {
-      const name = ($('commsName')?.value || state.name || '').trim();
+      const name = (
+        ($('commsRoomName')?.value || '').trim() ||
+        ($('commsName')?.value || '').trim() ||
+        state.name ||
+        ''
+      ).trim();
       const initial = (name.charAt(0) || '?').toUpperCase();
       [
         ['commsAvatarPreview', 'commsAvatarFallback', 'commsAvatarBtn', 'commsAvatarClear'],
@@ -4779,29 +4803,45 @@
       refreshAvatarUi();
     }
 
-    async function applyRoomNick(force = false) {
-      if (!state.code || !state.peerId) return;
+    async function applyRoomProfile(force = false) {
+      if (!state.code || !state.peerId) {
+        notify('entra no canal primeiro');
+        return;
+      }
       const input = $('commsRoomName');
-      if (!input) return;
-      const n = input.value.trim().slice(0, 24);
+      const n = (input?.value || state.name || '').trim().slice(0, 24);
       if (!n) {
-        input.value = state.name || '';
+        if (input) input.value = state.name || '';
         notify('nick nao pode ficar vazio');
         return;
       }
-      if (n === state.name && !force) return;
+      const nickChanged = n !== state.name;
+      const avatarPending = avatarDirty;
+      if (!nickChanged && !avatarPending && !force) return;
+
       state.name = n;
       if ($('commsName')) $('commsName').value = n;
+      if (input) input.value = n;
       save();
-      const r = await postPresence({ name: n });
+
+      const extra = { name: n };
+      if (avatarPending) extra.avatar = avatarPayload();
+
+      const r = await postPresence(extra);
       if (r?.ok) {
-        notify('nick atualizado');
+        const me = (r.peers || []).find((p) => p.id === state.peerId);
+        if (me?.name) state.name = String(me.name).trim().slice(0, 24) || state.name;
+        if ($('commsName')) $('commsName').value = state.name;
+        if (input) input.value = state.name;
+        save();
+        notify('alterações feitas com sucesso');
+        peersRenderKey = '';
         if (r.peers) renderPeers(r.peers, r.slots);
         refreshAvatarUi();
         refreshFeedFaces();
         if (typeof VoiceCall !== 'undefined' && VoiceCall?.refreshPeople) VoiceCall.refreshPeople();
       } else {
-        notify(r?.error || 'falha ao salvar nick');
+        notify(r?.error || 'falha ao salvar');
       }
     }
 
@@ -8939,6 +8979,7 @@
         if (!tip) return;
         tip.hidden = !show;
         tip.classList.toggle("on", !!show);
+        if (show) dismissToast();
       }
 
       function setBubble(show, text, actions) {
@@ -8950,6 +8991,7 @@
           $("commsCallBubbleText").textContent = text;
         }
         if (actionsEl) actionsEl.hidden = !actions;
+        if (show) dismissToast();
       }
 
       function setPhoneUi({ on, ringing }) {
@@ -10113,11 +10155,11 @@
       $('commsRoomName')?.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
-          applyRoomNick(true);
+          applyRoomProfile(true);
         }
       });
-      $('commsRoomName')?.addEventListener('blur', () => applyRoomNick());
-      $('commsRoomNickApply')?.addEventListener('click', () => applyRoomNick(true));
+      $('commsRoomName')?.addEventListener('blur', () => applyRoomProfile());
+      $('commsRoomNickApply')?.addEventListener('click', () => applyRoomProfile(true));
       $('commsAvatarFile')?.addEventListener('change', async (e) => {
         const file = e.target.files?.[0];
         e.target.value = '';

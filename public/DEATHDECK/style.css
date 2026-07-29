@@ -1684,6 +1684,7 @@ body.comms-locked #commsLyrics {
   flex: 0 0 auto;
   gap: 0.3rem;
   align-items: center;
+  overflow: visible;
 }
 .comms-top-actions .btn {
   min-width: 2.4rem;
@@ -1738,7 +1739,6 @@ body.comms-locked #commsLyrics {
   border-color: #1db954;
 }
 #commsSpotifyBtn {
-  letter-spacing: 0.04em;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1757,6 +1757,8 @@ body.comms-locked #commsLyrics {
 }
 #commsSpotifyBtn .spotify-btn-label {
   line-height: 1;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
 }
 .comms-more-panel #commsSpotifyBtn.on .spotify-btn-icon {
   filter: none;
@@ -3025,12 +3027,13 @@ body.comms-locked[data-comms-theme] .chassis .comms-msg .comms-voice-play.btn:ho
 .comms-call-wrap {
   position: relative;
   flex: 0 0 auto;
+  overflow: visible;
 }
 .comms-call-bubble {
   position: absolute;
   top: calc(100% + 0.45rem);
   right: 0;
-  z-index: 40;
+  z-index: 490;
   min-width: 11.5rem;
   max-width: min(16rem, 72vw);
   padding: 0.55rem 0.65rem 0.55rem;
@@ -5734,6 +5737,34 @@ body:has(#commsFacePop:not([hidden])) .deck-toast.on,
 body:has(.deck-fs-tip:not([hidden]).on) .deck-toast.on,
 body:has(.deck-fs-tip.on:not([hidden])) .deck-toast.on {
   transform: translateX(-50%) translateY(0);
+}
+/* ligação: toast não cobre bubble / modal "antes de ligar" */
+body:has(#commsCallBubble:not([hidden])) .deck-toast,
+body:has(#commsCallTip:not([hidden])) .deck-toast {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+/* em call: toast sobe pra não tapar barra / input */
+body:has(#commsCallBar:not([hidden])) .deck-toast,
+body:has(#commsCallBtn.ringing) .deck-toast {
+  bottom: auto;
+  top: max(1rem, env(safe-area-inset-top));
+  transform: translateX(-50%) translateY(-8px);
+}
+body:has(#commsCallBar:not([hidden])) .deck-toast.on,
+body:has(#commsCallBtn.ringing) .deck-toast.on {
+  transform: translateX(-50%) translateY(0);
+}
+#commsCallTip.deck-fs-tip {
+  z-index: 500;
+}
+body.comms-locked #commsCallBubble:not([hidden]) {
+  position: fixed;
+  top: max(3rem, calc(env(safe-area-inset-top) + 2.5rem));
+  right: max(0.75rem, env(safe-area-inset-right));
+  left: auto;
+  z-index: 490;
 }
 #commsName.comms-need-nick {
   border-color: #111;
