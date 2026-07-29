@@ -6,7 +6,6 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
-const { mountCyberdeckRoutes } = require('./DEATHDECK/routes');
 
 const ROOT = __dirname;
 const PUBLIC = path.join(ROOT, 'public');
@@ -48,30 +47,33 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
-mountCyberdeckRoutes(app);
+function mountAppRoutes() {
+  const { mountCyberdeckRoutes } = require('./DEATHDECK/routes');
+  mountCyberdeckRoutes(app);
 
-app.use(express.static(PUBLIC, { extensions: ['html'] }));
+  app.use(express.static(PUBLIC, { extensions: ['html'] }));
 
-app.get('/', (_req, res) => {
-  res.redirect('/DEATHDECK/');
-});
-
-app.get('/DEATHDECK', (_req, res) => {
-  res.redirect('/DEATHDECK/');
-});
-
-/* WBM embed · Adri16bit PC (build estático em public/pc) */
-app.get('/pc', (_req, res) => {
-  res.redirect(301, '/pc/');
-});
-app.use((req, res, next) => {
-  if (req.method !== 'GET' && req.method !== 'HEAD') return next();
-  if (!req.path.startsWith('/pc/')) return next();
-  if (path.extname(req.path)) return next();
-  res.sendFile(path.join(PUBLIC, 'pc', 'index.html'), (err) => {
-    if (err) next();
+  app.get('/', (_req, res) => {
+    res.redirect('/DEATHDECK/');
   });
-});
+
+  app.get('/DEATHDECK', (_req, res) => {
+    res.redirect('/DEATHDECK/');
+  });
+
+  /* WBM embed · Adri16bit PC (build estático em public/pc) */
+  app.get('/pc', (_req, res) => {
+    res.redirect(301, '/pc/');
+  });
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+    if (!req.path.startsWith('/pc/')) return next();
+    if (path.extname(req.path)) return next();
+    res.sendFile(path.join(PUBLIC, 'pc', 'index.html'), (err) => {
+      if (err) next();
+    });
+  });
+}
 
 const port = pickPort();
 try {
@@ -83,6 +85,7 @@ const server = http.createServer(app);
 server.listen(port, '0.0.0.0', () => {
   console.log(`DEATHDECK on :${port}  →  http://localhost:${port}/DEATHDECK/`);
   if (isCloud()) console.log('cloud mode · no localtunnel');
+  setImmediate(mountAppRoutes);
 });
 
 function shutdown() {
