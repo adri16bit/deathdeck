@@ -4837,6 +4837,7 @@
         notify('alterações feitas com sucesso');
         peersRenderKey = '';
         if (r.peers) renderPeers(r.peers, r.slots);
+        refreshFeedNickNames(state.peerId, state.name);
         refreshAvatarUi();
         refreshFeedFaces();
         if (typeof VoiceCall !== 'undefined' && VoiceCall?.refreshPeople) VoiceCall.refreshPeople();
@@ -5609,6 +5610,24 @@
         e.stopPropagation();
         openFacePop(face.dataset.facePeer || '', face.dataset.faceName || '');
       });
+    }
+
+    function refreshFeedNickNames(peerId = state.peerId, name = state.name) {
+      const id = String(peerId || '');
+      const next = String(name || '').trim();
+      if (!id || !next) return;
+      const patch = (root) => {
+        if (!root) return;
+        root.querySelectorAll(`.comms-msg[data-peer="${id}"]`).forEach((el) => {
+          const who = el.querySelector('.who-name');
+          if (who) who.textContent = next;
+          if (el._msg) el._msg.name = next;
+        });
+        root.querySelectorAll(`.comms-typing-row[data-peer="${id}"] .who-name`).forEach((who) => {
+          who.textContent = next;
+        });
+      };
+      patch($('commsFeed'));
     }
 
     function refreshFeedFaces() {
@@ -8213,6 +8232,18 @@
     }
 
     let peersRenderKey = '';
+    const lastPeerNames = Object.create(null);
+
+    function syncFeedNamesFromPeers(peers) {
+      for (const p of humanPeers(peers)) {
+        if (!p?.id) continue;
+        const name = String(p.name || '').trim();
+        if (!name) continue;
+        const prev = lastPeerNames[p.id];
+        lastPeerNames[p.id] = name;
+        if (prev !== undefined && prev !== name) refreshFeedNickNames(p.id, name);
+      }
+    }
 
     function renderPeers(peers, slots) {
       const el = $('commsPeers');
@@ -8220,6 +8251,17 @@
       state._lastPeers = peers || [];
       const humans = humanPeers(peers);
       const others = humans.filter((p) => p.id !== state.peerId);
+      const selfPeer = humans.find((p) => p.id === state.peerId);
+      if (selfPeer?.name) {
+        const live = String(selfPeer.name).trim().slice(0, 24);
+        if (live && live !== state.name) {
+          state.name = live;
+          if ($('commsName')) $('commsName').value = live;
+          const roomName = $('commsRoomName');
+          if (roomName && document.activeElement !== roomName) roomName.value = live;
+          refreshFeedNickNames(state.peerId, live);
+        }
+      }
       const me = escapeHtml(state.name || 'você');
       const max = Math.max(
         2,
@@ -8314,6 +8356,7 @@
         $('netPill').textContent = pill;
       }
       setTypingUi(peers);
+      syncFeedNamesFromPeers(peers);
     }
 
     function ensureTypingEl() {

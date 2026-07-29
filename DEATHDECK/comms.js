@@ -3255,7 +3255,18 @@ function mountCommsRoutes(app) {
       return;
     }
     peer.seen = Date.now();
-    if (req.body?.name) peer.name = String(req.body.name).trim().slice(0, 24) || peer.name;
+    if (req.body?.name) {
+      const next = String(req.body.name).trim().slice(0, 24);
+      if (next && next !== peer.name) {
+        peer.name = next;
+        for (const m of room.messages) {
+          if (m.peerId === peer.id && !m.sys) m.name = next;
+        }
+        scheduleSaveRooms();
+      } else if (next) {
+        peer.name = next;
+      }
+    }
     if (Object.prototype.hasOwnProperty.call(req.body || {}, 'avatar')) {
       applyPeerAvatar(peer, req.body.avatar, room.code);
     }
