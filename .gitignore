@@ -9,3 +9,10 @@ public/DEATHDECK/avatars/*
 !public/DEATHDECK/avatars/.gitkeep
 runtime-port.txt
 *.log
+
+# teste local (nao commitar)
+PUBLICAR.bat
+scripts/cloudflare-public.ps1
+tools/cloudflared.exe
+cloudflared-out.log
+cloudflared-err.log

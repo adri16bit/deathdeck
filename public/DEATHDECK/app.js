@@ -11508,7 +11508,8 @@
       },
       '2016': {
         stamp: '14:22:08 Jul 21, 2016',
-        url: 'https://boards.4chan.org/mu/thread/…',
+        url: 'https://boards.4chan.org/mu/',
+        outUrl: 'https://boards.4chan.org/mu/',
         page: '2016',
         about: '/mu/ thread · the spark',
       },
@@ -11815,6 +11816,30 @@
       }
     }
 
+    function openCapEmbed(key, opts = {}) {
+      const cap = CAP[key];
+      if (!cap?.outUrl) {
+        setCapture(key, opts);
+        return;
+      }
+      currentCap = key;
+      const ringId = `cap-${key}`;
+      const idx = RING.findIndex((r) => r.id === ringId);
+      if (idx >= 0) ringIndex = idx;
+      paintRingBar();
+      document.querySelectorAll('#wbmCal .wbm-dot').forEach((d) => {
+        d.classList.toggle('on', d.dataset.cap === key);
+      });
+      showEmbed(cap.outUrl, {
+        displayUrl: cap.url,
+        stamp: cap.stamp,
+        about: cap.about || '/mu/ thread',
+        ringId,
+        external: true,
+        silentHist: opts.silentHist,
+      });
+    }
+
     function setCapture(key, opts = {}) {
       const cap = CAP[key] || CAP['2009'];
       currentCap = key;
@@ -11832,6 +11857,7 @@
         url: cap.url,
         stamp: cap.stamp,
         about: `about this capture · ${cap.about || ''}`,
+        extHref: cap.outUrl || null,
       });
 
       hideCaptures();
@@ -11850,7 +11876,7 @@
         page.hidden = false;
         page.classList.add('on');
       }
-      if (cap.page === '2009') setSub(cap.sub || 'home');
+      if (cap.page === '2009') setSub(opts.sub || cap.sub || 'home');
       if (!opts.silentHist) pushHist({ type: 'cap', cap: key });
     }
 
@@ -11908,6 +11934,10 @@
       const site = RING[i];
       if (!site) return;
       if (site.kind === 'cap') {
+        if (CAP[site.cap]?.outUrl) {
+          openCapEmbed(site.cap, opts);
+          return;
+        }
         setCapture(site.cap, opts);
         return;
       }
@@ -11928,6 +11958,37 @@
       notify(`webring · ${RING[ringIndex]?.label || ''}`);
     }
 
+    function normalizeWbmUrl(raw) {
+      return String(raw || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\/+$/, '');
+    }
+
+    function matchCaptureFromUrl(raw) {
+      const lower = normalizeWbmUrl(raw);
+      if (!lower) return null;
+
+      for (const [sub, url] of Object.entries(SUB_URL)) {
+        if (lower === normalizeWbmUrl(url)) return { cap: '2009', sub };
+      }
+
+      const hits = [];
+      for (const [key, cap] of Object.entries(CAP)) {
+        if (!cap.url || cap.miss) continue;
+        const capUrl = normalizeWbmUrl(cap.url);
+        const bare = capUrl.replace(/^https?:\/\//, '');
+        const queryBare = lower.replace(/^https?:\/\//, '');
+        if (lower === capUrl || queryBare === bare || queryBare.endsWith(`/${bare}`) || queryBare.includes(bare)) {
+          hits.push(key);
+        }
+      }
+      if (!hits.length) return null;
+      const pick = hits.includes(currentCap) ? currentCap : hits.includes('2009') ? '2009' : hits[0];
+      const cap = CAP[pick];
+      return { cap: pick, sub: cap.sub || (pick === '2009' ? 'home' : null) };
+    }
+
     function searchRing(q) {
       const raw = String(q || '').trim();
       if (!raw) return null;
@@ -11939,11 +12000,23 @@
         return idx >= 0 ? RING[idx] : null;
       }
 
-      /* URL absoluta / caminho */
-      if (/^https?:\/\//i.test(raw) || raw.startsWith('/')) {
+      /* dominio / URL das capturas fake — nao abrir iframe externo */
+      if (/^https?:\/\//i.test(raw) || raw.startsWith('/') || /^[\w.-]+\.[a-z]{2,}/i.test(raw)) {
+        const capFromUrl = matchCaptureFromUrl(raw.startsWith('/') ? `${location.origin}${raw}` : raw);
+        if (capFromUrl) {
+          return {
+            kind: 'cap',
+            cap: capFromUrl.cap,
+            sub: capFromUrl.sub,
+            id: `cap-${capFromUrl.cap}`,
+            label: CAP[capFromUrl.cap]?.about || capFromUrl.cap,
+          };
+        }
         const hit = RING.find((r) => r.url && r.url.toLowerCase() === lower);
         if (hit) return hit;
-        return { kind: 'external', url: raw.startsWith('/') ? raw : raw, title: raw, id: 'typed' };
+        if (/^https?:\/\//i.test(raw) || raw.startsWith('/')) {
+          return { kind: 'external', url: raw.startsWith('/') ? raw : raw, title: raw, id: 'typed' };
+        }
       }
 
       /* match no anel */
@@ -11986,8 +12059,13 @@
         }
       }
       if (hit.kind === 'cap' && hit.cap) {
-        setCapture(hit.cap);
-        notify(`GO · capture ${hit.cap}`);
+        if (CAP[hit.cap]?.outUrl) {
+          openCapEmbed(hit.cap);
+          notify(`GO · ${hit.label || '/mu/'} · carregando no WBM`);
+          return;
+        }
+        setCapture(hit.cap, { sub: hit.sub });
+        notify(`GO · ${hit.label || `capture ${hit.cap}`}`);
         return;
       }
       if (hit.url) {
@@ -12092,6 +12170,12 @@
         if (dead) {
           e.preventDefault();
           deadLink(dead.getAttribute('data-wbm-dead'));
+          return;
+        }
+        const muLive = e.target.closest('[data-wbm-mu-live]');
+        if (muLive) {
+          e.preventDefault();
+          openCapEmbed('2016');
           return;
         }
         const jump = e.target.closest('[data-jump]');
