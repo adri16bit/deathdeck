@@ -1,0 +1,25 @@
+{
+  "name": "Deathdeck",
+  "short_name": "Deathdeck",
+  "description": "Canal live · watch · jogar",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f1ea",
+  "theme_color": "#111111",
+  "icons": [
+    {
+      "src": "assets/favicon.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/favicon.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
